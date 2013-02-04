@@ -190,8 +190,8 @@ if __name__ == "__main__":
 	inFile1.cmpIds2Dict(fwDict, outPair_1, outSing_1, 1)
 
 	# Check if sequences in the "pair" files are in the same order
-	outPair_1 = fastqFile('outpair1.txt', 'r')              # Change name of file later
-	outPair_2 = fastqFile('outpair2.txt', 'r')              # Change name of file later
+	outPair_1 = fastqFile('outpair1.fastq', 'r')              # Change name of file later
+	outPair_2 = fastqFile('outpair2.fastq', 'r')              # Change name of file later
 
 	print "[--] Check if sequences in 'pair' files are in the same order"
 
