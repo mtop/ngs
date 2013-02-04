@@ -25,7 +25,7 @@ class Conf(object):
 		self.fxt = config.get('run', 'fastx_trimmer')
 		self.ca = config.get('run', 'cutadapt')
 		self.fqf = config.get('run', 'fastq_quality_filter')
-		self.pq = config.get('run', 'pairSeq.py')
+		self.ps = config.get('run', 'pairSeq.py')
 
 		self.fxt_ext = ".FXT"
 		self.ca_ext = ".CA"
@@ -64,10 +64,10 @@ class Conf(object):
 		if self.fqf.lower()[0] == 'y' or self.fqf.lower()[0] == 't':
 			return True
 
-	def run_pq(self):
-		if self.pq == "":
+	def run_ps(self):
+		if self.ps == "":
 			return False
-		if self.pq.lower()[0] == 'y' or self.pq.lower()[0] == 't':
+		if self.ps.lower()[0] == 'y' or self.ps.lower()[0] == 't':
 			return True
 
 	def get_fileList(self):
@@ -164,33 +164,48 @@ class Cutadapt(object):
 				output.close()
 				fileNumber += 1
 			except:
-				print "Dude, ther is something wrong with cutadapt!"
+				print "Hmm... there is something wrong with cutadapt!"
 
 
-def makeCAconf():
-	# Check if a file called "cutadapt.conf" is 
-	# pressent in PWD. If not, crate this file.
-	if os.path.exists("cutadapt.conf"):
-		print "Found cutadapt.conf"
-	else:
-		ca_conf = open("cutadapt.conf", "w")
-		ca_conf.write("-a AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACCGATGTATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACTTAGGCATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACTGACCAATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACACAGTGATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACGCCAATATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACCAGATCATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACACTTGAATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACGATCAGATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACTAGCTTATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACGGCTACATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.write("-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACCTTGTAATCTCGTATGCCGTCTTCTGCTTG\n")
-		ca_conf.close()
+class FastqQualityFilter(object):
+	def __init__(self, conf):
+		conf = conf
 
-		print "Created a cutadapt.conf file"
+	def run(self):
+		# Run "fastq_quality_filter" on each of the output 
+		# files in fastq format from "cutadapt".
+		for i in conf.get_fileNames():
+			nameBase = noFileExt(i.split()[0])[0] + conf.fxt_ext + conf.ca_ext
+			qual = "-" + i.split()[1].upper()
+			inFile = nameBase + noFileExt(i.split()[0])[1]
+			outFile = nameBase + conf.fqf_ext + noFileExt(i.split()[0])[1]
+
+			try:
+				subprocess.call([	"fastq_quality_filter", qual,
+							"-q", conf.get_k(),
+							"-p", conf.get_p(),
+							"-i", inFile,
+							"-o", outFile])
+			except:
+				print "Bummer, this does not work!"
+
+class PairSeq(object):
+	def __init__(self, conf):
+		conf = conf
 	
+	def run(self):
+		num = 0
+		while num+1 <= len(conf.get_fileNames()):
+			file1 = conf.get_fileNames()[num].split()[0]
+			file2 = conf.get_fileNames()[num+1].split()[0]
+
+			try:
+				subprocess.call(["pairSeq.py", file1, file2])
+			except:
+				print "Wrong again!"
+
+			num = num+2
+
 
 def noFileExt(fileName):
 	if fileName[-6:].lower() == ".fastq":
@@ -207,6 +222,13 @@ def main(conf):
 		ca = Cutadapt(conf)
 		ca.run()
 
+	if conf.run_fqf() == True:
+		fqf = FastqQualityFilter(conf)
+		fqf.run()
+
+	if conf.run_ps() == True:
+		ps = PairSeq(conf)
+		ps.run()
 
 
 if __name__ == "__main__":
