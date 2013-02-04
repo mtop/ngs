@@ -129,15 +129,14 @@ class Cutadapt(object):
 #		makeCAconf()			# Redundant
 	
 	def run(self):
+		fileNumber = 1
 		for i in conf.get_fileNames():
-			fileNumber = 1
-			readInfoFile = "--info-file=cutadapt_read_info_%s.txt" % fileNumber
-			inFile = noFileExt(i.split()[0])[0] + conf.fxt_ext + conf.ca_ext + noFileExt(i.split()[0])[1]
-			outFile1 = noFileExt(i.split()[0])[0] + "_5prim_trim" + noFileExt(i.split()[0])[1]
-			outFile2 = noFileExt(i.split()[0])[0] + "_run_info_%s" % fileNumber + noFileExt(i.split()[0])[1]
+			nameBase = noFileExt(i.split()[0])[0] + conf.fxt_ext
+			readInfoFile = "--info-file=%s%s_read_info_%s.txt" % (nameBase, conf.ca_ext, fileNumber)
+			inFile = nameBase + noFileExt(i.split()[0])[1]
+			outFile1 = nameBase + conf.ca_ext + noFileExt(i.split()[0])[1]
+			outFile2 = nameBase + conf.ca_ext + "_run_info_%s" % fileNumber + noFileExt(i.split()[0])[1]
 			output = open(outFile2, "w")
-
-#			print "cutadapt", "-q", conf.get_q(), "-O", conf.get_o(), "-e", conf.get_e(), "-n", conf.get_n(), "-m", conf.get_m(), readInfoFile, "-o", outFile1, inFile, ">", outFile2
 
 			try:
 				subprocess.call([	"cutadapt",
@@ -167,7 +166,6 @@ class Cutadapt(object):
 			except:
 				print "Dude, ther is something wrong with cutadapt!"
 
-#cutadapt $(<cutadapt.conf) -q $q -O $o -e $e -n $n -m $m --info-file=cutadapt_read_info_1.txt -o $1_cutadapt.fastq $1_5primm_trimm.fastq > cutadapt_run_info_1.txt
 
 def makeCAconf():
 	# Check if a file called "cutadapt.conf" is 
