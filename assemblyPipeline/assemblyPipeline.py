@@ -5,6 +5,28 @@ import os.path
 
 ### Use a flag to indicate the config file to use. Uses 'my.cfg' for now.
 
+class FastqFile(object):
+	def __init__(self, fileInfo):
+		self.name = fileInfo.split()[0]
+		self.illformat = fileInfo.split()[1]
+		try:
+			if fileInfo.split()[2] == "'" or fileInfo.split()[2] == '"':
+				self.delim = ' '
+			else:
+				self.delim = fileInfo.split()[2]
+		except:
+			self.delim = ' '
+	
+	def getName(self):
+		return self.name
+
+	def getIllFormat(self):
+		return self.illformat
+	
+	def getDelim(self):
+		return self.delim
+		
+
 class Conf(object):
 	# Variable values read from configuration file 
 	# and misc. default values used during the analysis
@@ -32,17 +54,16 @@ class Conf(object):
 		self.fqf_ext = ".FQF"
 		self.ps_ext = ".PS"
 
-		# Create a list of file name variables (i.e. ["File1", "File2"]
-		# Probably redundant.
-		self.fileList = []
-		# Create a list of actual file names
+		# Create a list of file names.
 		self.fileNames = []
-		for i in range(1, 11):
-			name = "File" + str(i)
+		for i in range(1, 21):
 			try: 
-				self.name = config.get('rawfiles', str(i))
-				self.fileList.append(name)
-				self.fileNames.append(self.name)
+				# Find the name of the input file.
+				self.fileName = config.get('rawfiles', str(i))
+				# Create a FastqFile object.
+				f = FastqFile(self.fileName)
+				# Append the objet to a file object list.
+				self.fileNames.append(f)
 			except:
 				continue
 
@@ -69,9 +90,6 @@ class Conf(object):
 			return False
 		if self.ps.lower()[0] == 'y' or self.ps.lower()[0] == 't':
 			return True
-
-	def get_fileList(self):
-		return self.fileList
 
 	def get_fileNames(self):
 		return self.fileNames
@@ -196,11 +214,20 @@ class PairSeq(object):
 	def run(self):
 		num = 0
 		while num+1 <= len(conf.get_fileNames()):
-			file1 = conf.get_fileNames()[num].split()[0]
-			file2 = conf.get_fileNames()[num+1].split()[0]
+			file1 = conf.get_fileNames()[num]
+			file2 = conf.get_fileNames()[num+1]
+#			file1 = conf.get_fileNames()[num].split()[0]
+#			file2 = conf.get_fileNames()[num+1].split()[0]
+			
+			# Test if the two files in the pair have the same delimiter registered in the config file.
+			if file1.getDelim() == file2.getDelim():
+				pass
+			else:
+				print "%s and %s have different delimeters" % (file1.getDelim(), file2.getDelim())
+				break
 
 			try:
-				subprocess.call(["pairSeq.py", file1, file2])
+				subprocess.call(["pairSeq.py", file1.getName(), file2.getName(), file1.getDelim() ])
 			except:
 				print "Wrong again!"
 
@@ -234,3 +261,8 @@ def main(conf):
 if __name__ == "__main__":
 	conf = Conf()
 	main(conf)
+
+#	for i in conf.get_fileNames():
+#		print i.getName()
+#		print i.getIllFormat()
+#		print i.getDelim()
