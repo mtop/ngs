@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Usage:	pairSeq.py <inFile_1> <inFile_2>
+# Usage:	pairSeq.py <inFile_1> <inFile_2> "/"
 #
 # Description:	Separates paired end Illumina sequences into pairs 
 #		and singlets. Also checks if the output sequences 
@@ -49,9 +49,14 @@ from itertools import izip
 
 f1 = sys.argv[1]
 f2 = sys.argv[2]
+delim = sys.argv[3].strip('"\'')	# Perhaps redundant to try to remove " and ' characters.
 
-pairF1 = "%s.pair_1.fastq.txt" % f1
-pairF2 = "%s.pair_2.fastq.txt" % f2
+if delim == None:
+	delim = ' '
+
+
+# pairF1 = "%s.pair_1.fastq.txt" % f1		# Redundant.
+# pairF2 = "%s.pair_2.fastq.txt" % f2		# Redundant.
 
 
 class sequence(object):
@@ -77,7 +82,7 @@ class sequence(object):
 		return self.Id
 
 	def getPairId(self):
-		return self.Id.split(' ')[0]
+		return self.Id.split(delim)[0]
 
 	def getSeq(self):
 		return self.seq
@@ -107,12 +112,12 @@ class fastqFile(file):
 	def Ids2Dict(self):
 		# Reads the file, one sequence object at the time, and identifies
 		# the sequence identifiers. The identifiers
-		# are den split at whitespace, and the first
+		# are den split at the indicated delimiter, and the first
 		# part is stored in a dictionary.
 		seqIdDict = {}
 
 		for seq in self.getSeqs():
-			seqIdDict[seq.getId().split(' ')[0]] = False
+			seqIdDict[seq.getId().split(delim)[0]] = False
 		return seqIdDict
 
 	def cmpIds2Dict(self, fwDict, outPair, outSing, fileNr):
@@ -125,7 +130,7 @@ class fastqFile(file):
 			pair = True
 
 		for seq in self.getSeqs():
-			seqId = seq.getId().split(' ')[0]
+			seqId = seq.getId().split(delim)[0]
 			try:
 				if fwDict[seqId] == pair:
 					# Set output file to be the "pairs" file.	
@@ -186,10 +191,10 @@ def main():
 	# Generate fastqFile objects to read from and write to.
 	inFile1 = fastqFile(f1, 'r')		# First sequence file to read from
 	inFile2 = fastqFile(f2, 'r')		# Second sequence file to read from
-	outPair_1 = fastqFile(genFileName(f1, "Pair_1"), 'w')		# Change name of file later
-	outPair_2 = fastqFile(genFileName(f2, "Pair_2"), 'w')              # Change name of file later
-	outSing_1 = fastqFile(genFileName(f1, "Singles_1"), 'w')	# Change name of file later on 
-	outSing_2 = fastqFile(genFileName(f2, "Singles_2"), 'w') # Change name of file later on
+	outPair_1 = fastqFile(genFileName(f1, ".Pair_1"), 'w')	
+	outPair_2 = fastqFile(genFileName(f2, ".Pair_2"), 'w')
+	outSing_1 = fastqFile(genFileName(f1, ".Singles_1"), 'w')
+	outSing_2 = fastqFile(genFileName(f2, ".Singles_2"), 'w')
 
 	# Create dictionari containing sequence id's from first file (info. on direction removed).
 	print "[--] Building initial dictionary of sequence id's in first file."
@@ -209,8 +214,8 @@ def main():
 	inFile1.cmpIds2Dict(fwDict, outPair_1, outSing_1, 1)
 
 	# Check if sequences in the "pair" files are in the same order
-	outPair_1 = fastqFile(genFileName(f1, "Pair_1"), 'r')              # Change name of file later
-	outPair_2 = fastqFile(genFileName(f2, "Pair_2"), 'r')              # Change name of file later
+	outPair_1 = fastqFile(genFileName(f1, ".Pair_1"), 'r')              # Change name of file later
+	outPair_2 = fastqFile(genFileName(f2, ".Pair_2"), 'r')              # Change name of file later
 
 	print "[--] Check if sequences in 'pair' files are in the same order"
 
@@ -219,4 +224,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-#	print genFileName(f1, '.Pair_1')
