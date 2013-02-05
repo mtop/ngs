@@ -32,6 +32,9 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# TODO: Make sure that output is written to PWD.	
+#
 
 
 
@@ -39,6 +42,10 @@ import sys
 import gc
 #import io
 from itertools import izip
+
+
+
+
 
 f1 = sys.argv[1]
 f2 = sys.argv[2]
@@ -161,16 +168,28 @@ def compSeqOrder(outPair_1, outPair_2):
 				if fwSeq.getPairId() == rwSeq.getPairId():
 					count += 1
 			return count
-					
 
-if __name__ == "__main__":
+def noFileExt(fileName):
+	if fileName[-6:].lower() == ".fastq":
+		name = fileName[:-6]
+		ext = fileName[-6:]
+		return name, ext
+
+def genFileName(inFile, outType):
+	name = noFileExt(inFile)[0]
+	ext = noFileExt(inFile)[1]
+	newName = name + outType + ext
+	return newName
+
+					
+def main():
 	# Generate fastqFile objects to read from and write to.
 	inFile1 = fastqFile(f1, 'r')		# First sequence file to read from
 	inFile2 = fastqFile(f2, 'r')		# Second sequence file to read from
-	outPair_1 = fastqFile('outpair1.fastq', 'w')		# Change name of file later
-	outPair_2 = fastqFile('outpair2.fastq', 'w')              # Change name of file later
-	outSing_1 = fastqFile('outSingles1.fastq', 'w')	# Change name of file later on 
-	outSing_2 = fastqFile('outSingles2.fastq', 'w') # Change name of file later on
+	outPair_1 = fastqFile(genFileName(f1, "Pair_1"), 'w')		# Change name of file later
+	outPair_2 = fastqFile(genFileName(f2, "Pair_2"), 'w')              # Change name of file later
+	outSing_1 = fastqFile(genFileName(f1, "Singles_1"), 'w')	# Change name of file later on 
+	outSing_2 = fastqFile(genFileName(f2, "Singles_2"), 'w') # Change name of file later on
 
 	# Create dictionari containing sequence id's from first file (info. on direction removed).
 	print "[--] Building initial dictionary of sequence id's in first file."
@@ -186,13 +205,18 @@ if __name__ == "__main__":
 
 	# Compair Id's in file 1 to the once in the dictionary, then write to outfiles.
 	print "[--] Comparing id's in first file to the dictionary"
-	inFile1 = fastqFile(f1, 'r')		# Open teh first file again
+	inFile1 = fastqFile(f1, 'r')		# Open the first file again
 	inFile1.cmpIds2Dict(fwDict, outPair_1, outSing_1, 1)
 
 	# Check if sequences in the "pair" files are in the same order
-	outPair_1 = fastqFile('outpair1.fastq', 'r')              # Change name of file later
-	outPair_2 = fastqFile('outpair2.fastq', 'r')              # Change name of file later
+	outPair_1 = fastqFile(genFileName(f1, "Pair_1"), 'r')              # Change name of file later
+	outPair_2 = fastqFile(genFileName(f2, "Pair_2"), 'r')              # Change name of file later
 
 	print "[--] Check if sequences in 'pair' files are in the same order"
 
 	print "[op] %s sequnce pairs are in order" % compSeqOrder(outPair_1, outPair_2)
+
+
+if __name__ == "__main__":
+	main()
+#	print genFileName(f1, '.Pair_1')
