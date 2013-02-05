@@ -127,11 +127,14 @@ class FastxTrimmer(object):
 	def run(self):
 		fxtOutFiles = []
 		for i in conf.get_fileNames():
-			fileName = i.split()[0]
-			qual = "-" + i.split()[1].upper()
+			fileName = i.getName()
+#			fileName = i.split()[0]
+#			qual = "-" + i.split()[1].upper()
+			illFormat = "-" + i.getIllFormat().upper()
+			print illFormat				# Devel.
 			outFile = noFileExt(fileName)[0] + conf.fxt_ext + noFileExt(fileName)[1]
 			try:
-				subprocess.call([	"fastx_trimmer", qual,
+				subprocess.call([	"fastx_trimmer", illFormat,
 							"-f", conf.get_f(), 
 							"-i", fileName, 
 							"-o", outFile])
@@ -149,11 +152,11 @@ class Cutadapt(object):
 	def run(self):
 		fileNumber = 1
 		for i in conf.get_fileNames():
-			nameBase = noFileExt(i.split()[0])[0] + conf.fxt_ext
+			nameBase = noFileExt(i.getName())[0] + conf.fxt_ext
 			readInfoFile = "--info-file=%s%s_read_info_%s.txt" % (nameBase, conf.ca_ext, fileNumber)
-			inFile = nameBase + noFileExt(i.split()[0])[1]
-			outFile1 = nameBase + conf.ca_ext + noFileExt(i.split()[0])[1]
-			outFile2 = nameBase + conf.ca_ext + "_run_info_%s" % fileNumber + noFileExt(i.split()[0])[1]
+			inFile = nameBase + noFileExt(i.getName())[1]
+			outFile1 = nameBase + conf.ca_ext + noFileExt(i.getName())[1]
+			outFile2 = nameBase + conf.ca_ext + "_run_info_%s" % fileNumber + noFileExt(i.getName())[1]
 			output = open(outFile2, "w")
 
 			try:
@@ -193,13 +196,13 @@ class FastqQualityFilter(object):
 		# Run "fastq_quality_filter" on each of the output 
 		# files in fastq format from "cutadapt".
 		for i in conf.get_fileNames():
-			nameBase = noFileExt(i.split()[0])[0] + conf.fxt_ext + conf.ca_ext
-			qual = "-" + i.split()[1].upper()
-			inFile = nameBase + noFileExt(i.split()[0])[1]
-			outFile = nameBase + conf.fqf_ext + noFileExt(i.split()[0])[1]
+			nameBase = noFileExt(i.getName())[0] + conf.fxt_ext + conf.ca_ext
+			illFormat = "-" + i.getIllFormat().upper()
+			inFile = nameBase + noFileExt(i.getName())[1]
+			outFile = nameBase + conf.fqf_ext + noFileExt(i.getName())[1]
 
 			try:
-				subprocess.call([	"fastq_quality_filter", qual,
+				subprocess.call([	"fastq_quality_filter", illFormat,
 							"-q", conf.get_k(),
 							"-p", conf.get_p(),
 							"-i", inFile,
@@ -227,7 +230,7 @@ class PairSeq(object):
 				break
 
 			try:
-				subprocess.call(["pairSeq.py", file1.getName(), file2.getName(), file1.getDelim() ])
+				subprocess.call(["pairSeq.py", file1.getName(), file2.getName(), file1.getDelim()])
 			except:
 				print "Wrong again!"
 
@@ -261,8 +264,3 @@ def main(conf):
 if __name__ == "__main__":
 	conf = Conf()
 	main(conf)
-
-#	for i in conf.get_fileNames():
-#		print i.getName()
-#		print i.getIllFormat()
-#		print i.getDelim()
