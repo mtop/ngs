@@ -3,7 +3,7 @@
 import subprocess
 import os.path
 
-### Use a flagg to indicate the config file to use. Uses 'my.cfg' for now.
+### Use a flag to indicate the config file to use. Uses 'my.cfg' for now.
 
 class Conf(object):
 	# Variable values read from configuration file 
