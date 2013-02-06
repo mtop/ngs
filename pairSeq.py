@@ -191,10 +191,10 @@ def main():
 	# Generate fastqFile objects to read from and write to.
 	inFile1 = fastqFile(f1, 'r')		# First sequence file to read from
 	inFile2 = fastqFile(f2, 'r')		# Second sequence file to read from
-	outPair_1 = fastqFile(genFileName(f1, ".Pair_1"), 'w')	
-	outPair_2 = fastqFile(genFileName(f2, ".Pair_2"), 'w')
-	outSing_1 = fastqFile(genFileName(f1, ".Singles_1"), 'w')
-	outSing_2 = fastqFile(genFileName(f2, ".Singles_2"), 'w')
+	outPair_1 = fastqFile(genFileName(f1, ".Pair"), 'w')	
+	outPair_2 = fastqFile(genFileName(f2, ".Pair"), 'w')
+	outSing_1 = fastqFile(genFileName(f1, ".Singles"), 'w')
+	outSing_2 = fastqFile(genFileName(f2, ".Singles"), 'w')
 
 	# Create dictionari containing sequence id's from first file (info. on direction removed).
 	print "[--] Building initial dictionary of sequence id's in first file."
@@ -214,8 +214,8 @@ def main():
 	inFile1.cmpIds2Dict(fwDict, outPair_1, outSing_1, 1)
 
 	# Check if sequences in the "pair" files are in the same order
-	outPair_1 = fastqFile(genFileName(f1, ".Pair_1"), 'r')              # Change name of file later
-	outPair_2 = fastqFile(genFileName(f2, ".Pair_2"), 'r')              # Change name of file later
+	outPair_1 = fastqFile(genFileName(f1, ".Pair"), 'r')              # Change name of file later
+	outPair_2 = fastqFile(genFileName(f2, ".Pair"), 'r')              # Change name of file later
 
 	print "[--] Check if sequences in 'pair' files are in the same order"
 
