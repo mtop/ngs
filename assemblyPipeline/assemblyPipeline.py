@@ -43,11 +43,16 @@ class Conf(object):
 		self.m = config.get('cutadapt', 'm')
 		self.p = config.get('fastq_quality_filter', 'p')
 		self.k = config.get('fastq_quality_filter', 'k')
+		self.cpus = config.get('clc', 'cpus')
+		self.output_file = config.get('clc', 'output_file')
+		self.min_dist = config.get('clc', 'min_dist')
+		self.max_dist = config.get('clc', 'max_dist')
 
 		self.fxt = config.get('run', 'fastx_trimmer')
 		self.ca = config.get('run', 'cutadapt')
 		self.fqf = config.get('run', 'fastq_quality_filter')
 		self.ps = config.get('run', 'pairSeq.py')
+		self.clc_novo_assemble = config.get('run', 'clc_novo_assemble')
 
 		self.fxt_ext = ".FXT"
 		self.ca_ext = ".CA"
@@ -55,7 +60,7 @@ class Conf(object):
 		self.ps_ext = ".PS"
 
 		# Create a list of file names.
-		self.fileNames = []
+		self.files = []
 		for i in range(1, 21):
 			try: 
 				# Find the name of the input file.
@@ -63,9 +68,37 @@ class Conf(object):
 				# Create a FastqFile object.
 				f = FastqFile(self.fileName)
 				# Append the objet to a file object list.
-				self.fileNames.append(f)
+				self.files.append(f)
 			except:
 				continue
+
+	def getAssemblyFiles(self):
+		num = 0
+		pairList = []
+		singlesList = []
+		while num+1 <= len(self.get_files()):
+			tmpList = []
+			file1 = conf.get_files()[num].getName()
+			file2 = conf.get_files()[num+1].getName()
+			file1_pair = noFileExt(file1)[0] + self.fxt_ext + self.ca_ext + self.fqf_ext + self.ps_ext + ".Pair" + noFileExt(file1)[1]
+			file2_pair = noFileExt(file2)[0] + self.fxt_ext + self.ca_ext + self.fqf_ext + self.ps_ext + ".Pair" + noFileExt(file2)[1]
+			file1_singlets = noFileExt(file1)[0] + self.fxt_ext + self.ca_ext + self.fqf_ext + self.ps_ext + ".Singles" + noFileExt(file1)[1]
+			file2_singlets = noFileExt(file2)[0] + self.fxt_ext + self.ca_ext + self.fqf_ext + self.ps_ext + ".Singles" + noFileExt(file2)[1]
+			tmpList.append(file1_pair)
+			tmpList.append(file2_pair)
+			pairList.append(tmpList)
+			singlesList.extend([file1_singlets, file2_singlets])
+			num = num+2
+		return pairList, singlesList
+
+	def getPairs(self):
+		return self.getAssemblyFiles()[0]
+
+	def getSinglets(self):
+		return self.getAssemblyFiles()[1]
+
+
+		
 
 	def run_fxt(self):
 		if self.fxt == "":
@@ -91,8 +124,14 @@ class Conf(object):
 		if self.ps.lower()[0] == 'y' or self.ps.lower()[0] == 't':
 			return True
 
-	def get_fileNames(self):
-		return self.fileNames
+	def run_clc_novo_assemble(self):
+		if self.clc == "":
+			return False
+		if self.clc.lower()[0] == 'y' or self.clc.lower()[0] == 't':
+			return True
+
+	def get_files(self):
+		return self.files
 
 	def get_f(self):
 		return self.f
@@ -118,20 +157,32 @@ class Conf(object):
 	def get_k(self):
 		return self.k
 
+	def get_cpus(self):
+		return self.cpus
+
+	def get_output_file(self):
+		return self.output_file
+	
+	def get_min_dist(self):
+		return self.min_dist
+
+	def get_max_dist(self):
+		return self.max_dist
+
 
 class FastxTrimmer(object):
-	# Run "fastx_trimmer" on each or the input files.
+	# Run "fastx_trimmer" on each of the input files.
 	def __init__(self, conf):
 		conf = conf
 	
 	def run(self):
 		fxtOutFiles = []
-		for i in conf.get_fileNames():
+		for i in conf.get_files():
 			fileName = i.getName()
 #			fileName = i.split()[0]
 #			qual = "-" + i.split()[1].upper()
 			illFormat = "-" + i.getIllFormat().upper()
-			print illFormat				# Devel.
+#			print illFormat				# Devel.
 			outFile = noFileExt(fileName)[0] + conf.fxt_ext + noFileExt(fileName)[1]
 			try:
 				subprocess.call([	"fastx_trimmer", illFormat,
@@ -151,7 +202,7 @@ class Cutadapt(object):
 	
 	def run(self):
 		fileNumber = 1
-		for i in conf.get_fileNames():
+		for i in conf.get_files():
 			nameBase = noFileExt(i.getName())[0] + conf.fxt_ext
 			readInfoFile = "--info-file=%s%s_read_info_%s.txt" % (nameBase, conf.ca_ext, fileNumber)
 			inFile = nameBase + noFileExt(i.getName())[1]
@@ -195,7 +246,7 @@ class FastqQualityFilter(object):
 	def run(self):
 		# Run "fastq_quality_filter" on each of the output 
 		# files in fastq format from "cutadapt".
-		for i in conf.get_fileNames():
+		for i in conf.get_files():
 			nameBase = noFileExt(i.getName())[0] + conf.fxt_ext + conf.ca_ext
 			illFormat = "-" + i.getIllFormat().upper()
 			inFile = nameBase + noFileExt(i.getName())[1]
@@ -216,11 +267,9 @@ class PairSeq(object):
 	
 	def run(self):
 		num = 0
-		while num+1 <= len(conf.get_fileNames()):
-			file1 = conf.get_fileNames()[num]
-			file2 = conf.get_fileNames()[num+1]
-#			file1 = conf.get_fileNames()[num].split()[0]
-#			file2 = conf.get_fileNames()[num+1].split()[0]
+		while num+1 <= len(conf.get_files()):
+			file1 = conf.get_files()[num]
+			file2 = conf.get_files()[num+1]
 			
 			# Test if the two files in the pair have the same delimiter registered in the config file.
 			if file1.getDelim() == file2.getDelim():
@@ -235,6 +284,41 @@ class PairSeq(object):
 				print "Wrong again!"
 
 			num = num+2
+
+class Clc_novo_assemble(object):
+	def __init__(self, conf):
+		conf = conf
+
+	def getArgs(self):
+		args = ["clc_novo_assemble", "--cpus", conf.get_cpus(), 
+			"-o", conf.get_output_file(), 
+			"-p", "fb", "ss", conf.get_min_dist(), conf.get_max_dist()]
+
+		args.extend(["-q", "-i"])
+		for pair in conf.getPairs():
+			# TODO: Test if files exists and are non-empty.
+			args.extend([pair[0], pair[1]])
+
+		args.extend(["-p", "no", "-q"])
+		for i in conf.getSinglets():
+			# TODO: Test if file exists and is non-empty.
+			args.append(i)
+
+		print args				# Devel.
+
+
+
+#clc_novo_assemble --cpus 16 -o $FILE_NOVO_OUT -p fb ss $MIN_DISTANCE $MAX_DISTANCE -q -i $FILE1 $FILE2 -q -i $FILE3 $FILE4 -p no -q $FILE5 $FILE6 $FILE7
+
+
+
+
+	def run(self):
+		
+		try:
+			subprocess.call(args)
+		except:
+			print "No, no, no!"
 
 
 def noFileExt(fileName):
@@ -260,7 +344,15 @@ def main(conf):
 		ps = PairSeq(conf)
 		ps.run()
 
+	if conf.run_clc() == True:
+		clc = Clc(conf)
+		clc.run()
+
 
 if __name__ == "__main__":
 	conf = Conf()
-	main(conf)
+	print conf.getPairs()
+	print conf.getSinglets()
+	clc = Clc_novo_assemble(conf)
+	clc.getArgs()
+#	main(conf)
