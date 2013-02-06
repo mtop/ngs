@@ -289,7 +289,7 @@ class Clc_novo_assemble(object):
 	def __init__(self, conf):
 		conf = conf
 
-	def getArgs(self):
+	def run(self):
 		args = ["clc_novo_assemble", "--cpus", conf.get_cpus(), 
 			"-o", conf.get_output_file(), 
 			"-p", "fb", "ss", conf.get_min_dist(), conf.get_max_dist()]
@@ -304,17 +304,6 @@ class Clc_novo_assemble(object):
 			# TODO: Test if file exists and is non-empty.
 			args.append(i)
 
-		print args				# Devel.
-
-
-
-#clc_novo_assemble --cpus 16 -o $FILE_NOVO_OUT -p fb ss $MIN_DISTANCE $MAX_DISTANCE -q -i $FILE1 $FILE2 -q -i $FILE3 $FILE4 -p no -q $FILE5 $FILE6 $FILE7
-
-
-
-
-	def run(self):
-		
 		try:
 			subprocess.call(args)
 		except:
@@ -344,15 +333,11 @@ def main(conf):
 		ps = PairSeq(conf)
 		ps.run()
 
-	if conf.run_clc() == True:
+	if conf.run_clc_novo_assemble() == True:
 		clc = Clc(conf)
 		clc.run()
 
 
 if __name__ == "__main__":
 	conf = Conf()
-	print conf.getPairs()
-	print conf.getSinglets()
-	clc = Clc_novo_assemble(conf)
-	clc.getArgs()
-#	main(conf)
+	main(conf)
