@@ -80,10 +80,10 @@ class Conf(object):
 			tmpList = []
 			file1 = conf.get_files()[num].getName()
 			file2 = conf.get_files()[num+1].getName()
-			file1_pair = noFileExt(file1)[0] + self.fxt_ext + self.ca_ext + self.fqf_ext + self.ps_ext + ".Pair" + noFileExt(file1)[1]
-			file2_pair = noFileExt(file2)[0] + self.fxt_ext + self.ca_ext + self.fqf_ext + self.ps_ext + ".Pair" + noFileExt(file2)[1]
-			file1_singlets = noFileExt(file1)[0] + self.fxt_ext + self.ca_ext + self.fqf_ext + self.ps_ext + ".Singles" + noFileExt(file1)[1]
-			file2_singlets = noFileExt(file2)[0] + self.fxt_ext + self.ca_ext + self.fqf_ext + self.ps_ext + ".Singles" + noFileExt(file2)[1]
+			file1_pair = noFileExt(file1)[0] + ".Pair" + noFileExt(file1)[1]
+			file2_pair = noFileExt(file2)[0] + ".Pair" + noFileExt(file2)[1]
+			file1_singlets = noFileExt(file1)[0] + ".Singles" + noFileExt(file1)[1]
+			file2_singlets = noFileExt(file2)[0] + ".Singles" + noFileExt(file2)[1]
 			tmpList.append(file1_pair)
 			tmpList.append(file2_pair)
 			pairList.append(tmpList)
@@ -125,9 +125,9 @@ class Conf(object):
 			return True
 
 	def run_clc_novo_assemble(self):
-		if self.clc == "":
+		if self.clc_novo_assemble == "":
 			return False
-		if self.clc.lower()[0] == 'y' or self.clc.lower()[0] == 't':
+		if self.clc_novo_assemble.lower()[0] == 'y' or self.clc_novo_assemble.lower()[0] == 't':
 			return True
 
 	def get_files(self):
@@ -290,24 +290,32 @@ class Clc_novo_assemble(object):
 		conf = conf
 
 	def run(self):
-		args = ["clc_novo_assemble", "--cpus", conf.get_cpus(), 
-			"-o", conf.get_output_file(), 
-			"-p", "fb", "ss", conf.get_min_dist(), conf.get_max_dist()]
+		args = ["clc_novo_assemble", "--cpus", str(conf.get_cpus()), 
+			"-o", str(conf.get_output_file()), 
+			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
 
 		args.extend(["-q", "-i"])
 		for pair in conf.getPairs():
 			# TODO: Test if files exists and are non-empty.
-			args.extend([pair[0], pair[1]])
+			args.extend([str(pair[0]), str(pair[1])])
 
 		args.extend(["-p", "no", "-q"])
 		for i in conf.getSinglets():
 			# TODO: Test if file exists and is non-empty.
-			args.append(i)
+			args.append(str(i))
+
+		print args
+		for i in args:
+			print i
+			print type(i)
 
 		try:
 			subprocess.call(args)
 		except:
 			print "No, no, no!"
+
+	def run(self):
+		subprocess.call(['clc_novo_assemble', '--cpus', '8', '-o', 'Surirella_1234', '-p', 'fb', 'ss', '100', '450', '-q', '-i', 'Data_2_100000_1.Pair.fastq', 'Data_2_100000_2.Pair.fastq', 'data-1.read_1.Pair.fastq', 'data-1.read_2.Pair.fastq', '-p', 'no', '-q', 'Data_2_100000_1.Singles.fastq', 'Data_2_100000_2.Singles.fastq', 'data-1.read_1.Singles.fastq', 'data-1.read_2.Singles.fastq'])
 
 
 def noFileExt(fileName):
@@ -334,7 +342,7 @@ def main(conf):
 		ps.run()
 
 	if conf.run_clc_novo_assemble() == True:
-		clc = Clc(conf)
+		clc = Clc_novo_assemble(conf)
 		clc.run()
 
 
