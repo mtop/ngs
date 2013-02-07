@@ -48,6 +48,7 @@ class Conf(object):
 		self.output_novo = config.get('clc', 'output_novo')
 		self.output_ref = config.get('clc', 'output_ref')
 		self.output_info = config.get('clc', 'output_info')
+		self.output_prefix = config.get('output', 'prefix')
 		self.min_dist = config.get('clc', 'min_dist')
 		self.max_dist = config.get('clc', 'max_dist')
 
@@ -102,9 +103,6 @@ class Conf(object):
 	def getSinglets(self):
 		return self.getAssemblyFiles()[1]
 
-
-		
-
 	def run_fxt(self):
 		if self.fxt == "":
 			return False
@@ -147,7 +145,6 @@ class Conf(object):
 		if self.clc_info_assemble.lower()[0] == 'y' or self.clc_info_assemble.lower()[0] == 't':
 			return True
 
-
 	def get_files(self):
 		return self.files
 
@@ -187,11 +184,27 @@ class Conf(object):
 	def get_output_info(self):
 		return self.output_info
 	
+	def get_output_prefix(self):
+		return self.output_prefix
+	
 	def get_min_dist(self):
 		return self.min_dist
 
 	def get_max_dist(self):
 		return self.max_dist
+
+class Log(object):
+	def __init__(self, conf):
+		conf = conf
+		out = open(conf.output_prefix + ".log", "w")
+
+	def write(self, text):
+		out = open(conf.output_prefix + ".log", "a")
+		out.write(text + '\n')
+		out.close()
+
+	def time(self):
+		self.write(time.ctime())
 
 
 class FastxTrimmer(object):
@@ -200,6 +213,7 @@ class FastxTrimmer(object):
 		conf = conf
 	
 	def run(self):
+		log.write('\n'"	fastx_trimmer"'\n')
 		fxtOutFiles = []
 		for i in conf.get_files():
 			fileName = i.getName()
@@ -208,6 +222,10 @@ class FastxTrimmer(object):
 			illFormat = "-" + i.getIllFormat().upper()
 #			print illFormat				# Devel.
 			outFile = noFileExt(fileName)[0] + conf.fxt_ext + noFileExt(fileName)[1]
+
+			log.time()
+			log.write("[--] " + "Running fastx_trimmer: %s" % i.getName())
+
 			try:
 				subprocess.call([	"fastx_trimmer", illFormat,
 							"-f", conf.get_f(), 
@@ -225,6 +243,7 @@ class Cutadapt(object):
 #		makeCAconf()			# Redundant
 	
 	def run(self):
+		log.write('\n'"	cutadapt"'\n')
 		fileNumber = 1
 		for i in conf.get_files():
 			nameBase = noFileExt(i.getName())[0] + conf.fxt_ext
@@ -233,6 +252,9 @@ class Cutadapt(object):
 			outFile1 = os.getcwdu() + "/" + nameBase + conf.ca_ext + noFileExt(i.getName())[1]
 			outFile2 = nameBase + conf.ca_ext + "_run_info_%s" % fileNumber + noFileExt(i.getName())[1]
 			output = open(outFile2, "w")
+
+			log.time()
+			log.write("[--] " + "Running cutadapt: %s" % i.getName())
 
 			try:
 				subprocess.call([	"cutadapt",
@@ -270,11 +292,15 @@ class FastqQualityFilter(object):
 	def run(self):
 		# Run "fastq_quality_filter" on each of the output 
 		# files in fastq format from "cutadapt".
+		log.write('\n'"	fastq_quality_filter"'\n')
 		for i in conf.get_files():
 			nameBase = noFileExt(i.getName())[0] + conf.fxt_ext + conf.ca_ext
 			illFormat = "-" + i.getIllFormat().upper()
 			inFile = nameBase + noFileExt(i.getName())[1]
 			outFile = nameBase + conf.fqf_ext + noFileExt(i.getName())[1]
+
+			log.time()
+			log.write("[--] " + "Running fastq_quality_filter: %s" % i.getName())
 
 			try:
 				subprocess.call([	"fastq_quality_filter", illFormat,
@@ -290,18 +316,22 @@ class PairSeq(object):
 		conf = conf
 	
 	def run(self):
+		log.write('\n'"	pairSeq.py"'\n')
 		num = 0
 		while num+1 <= len(conf.get_files()):
 			file1 = conf.get_files()[num]
 			file2 = conf.get_files()[num+1]
+
+			log.time()
+			log.write("[--] " + "Running pairSeq.py: %s & %s" % (file1, file2))
 			
 			# Test if the two files in the pair have the same delimiter registered in the config file.
 			if file1.getDelim() == file2.getDelim():
 				pass
 			else:
-				print "%s and %s have different delimeters" % (file1.getDelim(), file2.getDelim())
+				log.write("[ww] %s and %s have different delimeters" % (file1.getDelim(), file2.getDelim())) # Bug.
 				break
-
+			
 			try:
 				subprocess.call(["pairSeq.py", file1.getName(), file2.getName(), file1.getDelim()])
 			except:
@@ -314,6 +344,11 @@ class Clc_novo_assemble(object):
 		conf = conf
 
 	def run(self):
+
+		log.write('\n'"	clc"'\n')
+		log.time()
+		log.write("[--] " + "Running clc_novo_assemble")
+
 		args = ["clc_novo_assemble", "--cpus", str(conf.get_cpus()), 
 			"-o", os.getcwdu() + "/" + str(conf.get_output_novo()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
@@ -337,6 +372,10 @@ class Clc_ref_assemble(object):
 		conf = conf
 	
 	def run(self):
+
+		log.time()
+		log.write("[--] " + "Running clc_ref_assemble")
+
 		args = ["clc_ref_assemble", "--cpus", str(conf.get_cpus()), 
 			"-o", os.getcwdu() + "/" + str(conf.get_output_ref()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
@@ -362,6 +401,10 @@ class Clc_info_assemble(object):
 		conf = conf
 
 	def run(self):
+
+		log.time()
+		log.write("[--] " + "Running assembly_info")
+
 		args = ["assembly_info", "-c", "-n", conf.get_output_ref()]
 
 		try:
@@ -411,11 +454,12 @@ def main(conf):
 		clcInfo = Clc_info_assemble(conf)
 		clcInfo.run()
 
-	
+	log.write("[--] Analysis finished %s" % time.ctime())	
 
 
 if __name__ == "__main__":
 	conf = Conf()
+	log = Log(conf)
 	main(conf)
 #	print os.getcwdu() + "/"
 #	print time.ctime()
