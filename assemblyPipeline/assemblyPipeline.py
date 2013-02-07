@@ -44,7 +44,8 @@ class Conf(object):
 		self.p = config.get('fastq_quality_filter', 'p')
 		self.k = config.get('fastq_quality_filter', 'k')
 		self.cpus = config.get('clc', 'cpus')
-		self.output_file = config.get('clc', 'output_file')
+		self.output_novo = config.get('clc', 'output_novo')
+		self.output_ref = config.get('clc', 'output_ref')
 		self.min_dist = config.get('clc', 'min_dist')
 		self.max_dist = config.get('clc', 'max_dist')
 
@@ -53,6 +54,7 @@ class Conf(object):
 		self.fqf = config.get('run', 'fastq_quality_filter')
 		self.ps = config.get('run', 'pairSeq.py')
 		self.clc_novo_assemble = config.get('run', 'clc_novo_assemble')
+		self.clc_ref_assemble = config.get('run', 'clc_ref_assemble')
 
 		self.fxt_ext = ".FXT"
 		self.ca_ext = ".CA"
@@ -130,6 +132,12 @@ class Conf(object):
 		if self.clc_novo_assemble.lower()[0] == 'y' or self.clc_novo_assemble.lower()[0] == 't':
 			return True
 
+	def run_clc_ref_assemble(self):
+		if self.clc_ref_assemble == "":
+			return False
+		if self.clc_ref_assemble.lower()[0] == 'y' or self.clc_ref_assemble.lower()[0] == 't':
+			return True
+
 	def get_files(self):
 		return self.files
 
@@ -160,8 +168,11 @@ class Conf(object):
 	def get_cpus(self):
 		return self.cpus
 
-	def get_output_file(self):
-		return self.output_file
+	def get_output_novo(self):
+		return self.output_novo
+
+	def get_output_ref(self):
+		return self.output_ref
 	
 	def get_min_dist(self):
 		return self.min_dist
@@ -291,7 +302,7 @@ class Clc_novo_assemble(object):
 
 	def run(self):
 		args = ["clc_novo_assemble", "--cpus", str(conf.get_cpus()), 
-			"-o", str(conf.get_output_file()), 
+			"-o", str(conf.get_output_novo()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
 
 		args.extend(["-q", "-i"])
@@ -303,19 +314,40 @@ class Clc_novo_assemble(object):
 		for i in conf.getSinglets():
 			# TODO: Test if file exists and is non-empty.
 			args.append(str(i))
-
-		print args
-		for i in args:
-			print i
-			print type(i)
-
 		try:
 			subprocess.call(args)
 		except:
 			print "No, no, no!"
 
+class Clc_ref_assemble(object):
+	def __init__(self, conf):
+		conf = conf
+	
 	def run(self):
-		subprocess.call(['clc_novo_assemble', '--cpus', '8', '-o', 'Surirella_1234', '-p', 'fb', 'ss', '100', '450', '-q', '-i', 'Data_2_100000_1.Pair.fastq', 'Data_2_100000_2.Pair.fastq', 'data-1.read_1.Pair.fastq', 'data-1.read_2.Pair.fastq', '-p', 'no', '-q', 'Data_2_100000_1.Singles.fastq', 'Data_2_100000_2.Singles.fastq', 'data-1.read_1.Singles.fastq', 'data-1.read_2.Singles.fastq'])
+		args = ["clc_ref_assemble", "--cpus", str(conf.get_cpus()), 
+			"-o", str(conf.get_output_ref()), 
+			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
+
+		args.extend(["-q", "-i"])
+		for pair in conf.getPairs():
+			# TODO: Test if files exists and are non-empty.
+			args.extend([str(pair[0]), str(pair[1])])
+
+		args.extend(["-p", "no", "-q"])
+		for i in conf.getSinglets():
+			# TODO: Test if file exists and is non-empty.
+			args.append(str(i))
+		args.extend(["-d", str(conf.get_output_novo())])
+		try:
+			subprocess.call(args)
+		except:
+			print "No, no, no!"
+
+
+		
+
+
+#time /state/partition3/CLC-AssemblyCell/clc-assembly-cell-beta-4.0.6-linux_64/clc_ref_assemble --cpus 8 -o $FILE_REF_OUT -p fb ss $MIN_DISTANCE $MAX_DISTANCE -q -i $FILE1 $FILE2 -q -i $FILE3 $FILE4 -q -p no $FILE5 $FILE6 $FILE7  -d $FILE_NOVO_OUT
 
 
 def noFileExt(fileName):
@@ -342,8 +374,12 @@ def main(conf):
 		ps.run()
 
 	if conf.run_clc_novo_assemble() == True:
-		clc = Clc_novo_assemble(conf)
-		clc.run()
+		clcNovo = Clc_novo_assemble(conf)
+		clcNovo.run()
+
+	if conf.run_clc_ref_assemble() == True:
+		clcRef = Clc_ref_assemble(conf)
+		clcRef.run()
 
 
 if __name__ == "__main__":
