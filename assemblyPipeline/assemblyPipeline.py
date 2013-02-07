@@ -2,6 +2,7 @@
 
 import subprocess
 import os.path
+import time
 
 ### Use a flag to indicate the config file to use. Uses 'my.cfg' for now.
 
@@ -46,6 +47,7 @@ class Conf(object):
 		self.cpus = config.get('clc', 'cpus')
 		self.output_novo = config.get('clc', 'output_novo')
 		self.output_ref = config.get('clc', 'output_ref')
+		self.output_info = config.get('clc', 'output_info')
 		self.min_dist = config.get('clc', 'min_dist')
 		self.max_dist = config.get('clc', 'max_dist')
 
@@ -55,6 +57,7 @@ class Conf(object):
 		self.ps = config.get('run', 'pairSeq.py')
 		self.clc_novo_assemble = config.get('run', 'clc_novo_assemble')
 		self.clc_ref_assemble = config.get('run', 'clc_ref_assemble')
+		self.clc_info_assemble = config.get('run', 'clc_info_assemble')
 
 		self.fxt_ext = ".FXT"
 		self.ca_ext = ".CA"
@@ -138,6 +141,13 @@ class Conf(object):
 		if self.clc_ref_assemble.lower()[0] == 'y' or self.clc_ref_assemble.lower()[0] == 't':
 			return True
 
+	def run_clc_info_assemble(self):
+		if self.clc_info_assemble == "":
+			return False
+		if self.clc_info_assemble.lower()[0] == 'y' or self.clc_info_assemble.lower()[0] == 't':
+			return True
+
+
 	def get_files(self):
 		return self.files
 
@@ -173,6 +183,9 @@ class Conf(object):
 
 	def get_output_ref(self):
 		return self.output_ref
+
+	def get_output_info(self):
+		return self.output_info
 	
 	def get_min_dist(self):
 		return self.min_dist
@@ -199,7 +212,7 @@ class FastxTrimmer(object):
 				subprocess.call([	"fastx_trimmer", illFormat,
 							"-f", conf.get_f(), 
 							"-i", fileName, 
-							"-o", outFile])
+							"-o", os.getcwdu() + "/" + outFile])
 				fxtOutFiles.append(outFile)				# Perhaps redundant
 
 			except:
@@ -217,7 +230,7 @@ class Cutadapt(object):
 			nameBase = noFileExt(i.getName())[0] + conf.fxt_ext
 			readInfoFile = "--info-file=%s%s_read_info_%s.txt" % (nameBase, conf.ca_ext, fileNumber)
 			inFile = nameBase + noFileExt(i.getName())[1]
-			outFile1 = nameBase + conf.ca_ext + noFileExt(i.getName())[1]
+			outFile1 = os.getcwdu() + "/" + nameBase + conf.ca_ext + noFileExt(i.getName())[1]
 			outFile2 = nameBase + conf.ca_ext + "_run_info_%s" % fileNumber + noFileExt(i.getName())[1]
 			output = open(outFile2, "w")
 
@@ -268,7 +281,7 @@ class FastqQualityFilter(object):
 							"-q", conf.get_k(),
 							"-p", conf.get_p(),
 							"-i", inFile,
-							"-o", outFile])
+							"-o", os.getcwdu() + "/" + outFile])
 			except:
 				print "Bummer, this does not work!"
 
@@ -302,7 +315,7 @@ class Clc_novo_assemble(object):
 
 	def run(self):
 		args = ["clc_novo_assemble", "--cpus", str(conf.get_cpus()), 
-			"-o", str(conf.get_output_novo()), 
+			"-o", os.getcwdu() + "/" + str(conf.get_output_novo()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
 
 		args.extend(["-q", "-i"])
@@ -325,7 +338,7 @@ class Clc_ref_assemble(object):
 	
 	def run(self):
 		args = ["clc_ref_assemble", "--cpus", str(conf.get_cpus()), 
-			"-o", str(conf.get_output_ref()), 
+			"-o", os.getcwdu() + "/" + str(conf.get_output_ref()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
 
 		args.extend(["-q", "-i"])
@@ -344,11 +357,24 @@ class Clc_ref_assemble(object):
 			print "No, no, no!"
 
 
+class Clc_info_assemble(object):
+	def __init__(self, conf):
+		conf = conf
+
+	def run(self):
+		args = ["assembly_info", "-c", "-n", conf.get_output_ref()]
+
+		try:
+			call = subprocess.Popen(args, stdout=subprocess.PIPE)
+			data = call.communicate()[0]
+
+			out = open(os.getcwdu() + "/" + conf.get_output_info(), "w")
+			out.write(data)
+			out.close()
+
+		except:
+			print "Assembly_info is fubar"
 		
-
-
-#time /state/partition3/CLC-AssemblyCell/clc-assembly-cell-beta-4.0.6-linux_64/clc_ref_assemble --cpus 8 -o $FILE_REF_OUT -p fb ss $MIN_DISTANCE $MAX_DISTANCE -q -i $FILE1 $FILE2 -q -i $FILE3 $FILE4 -q -p no $FILE5 $FILE6 $FILE7  -d $FILE_NOVO_OUT
-
 
 def noFileExt(fileName):
 	if fileName[-6:].lower() == ".fastq":
@@ -381,7 +407,15 @@ def main(conf):
 		clcRef = Clc_ref_assemble(conf)
 		clcRef.run()
 
+	if conf.run_clc_info_assemble() == True:
+		clcInfo = Clc_info_assemble(conf)
+		clcInfo.run()
+
+	
+
 
 if __name__ == "__main__":
 	conf = Conf()
 	main(conf)
+#	print os.getcwdu() + "/"
+#	print time.ctime()
