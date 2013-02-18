@@ -259,8 +259,8 @@ class Cutadapt(object):
 			log.write("[--] " + "Running cutadapt: %s" % i.getName())
 
 			try:
+				# Note: the -b flag indicates a seach in both 5' and 3' ends.
 				analysis = subprocess.Popen([	"cutadapt",
-							"-g", "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT"
 							"-b", "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
 							"-b", "GATCGGAAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTG",
 							"-b", "GATCGGAAGAGCACACGTCTGAACTCCAGTCACCGATGTATCTCGTATGCCGTCTTCTGCTTG",
