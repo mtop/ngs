@@ -196,7 +196,7 @@ class Conf(object):
 class Log(object):
 	def __init__(self, conf):
 		conf = conf
-		out = open(conf.output_prefix + ".log", "w")
+		out = open(conf.output_prefix + ".log", "a")	# Is this step necessary?
 
 	def write(self, text):
 		out = open(conf.output_prefix + ".log", "a")
