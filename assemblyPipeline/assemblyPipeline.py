@@ -329,7 +329,7 @@ class PairSeq(object):
 			file2 = conf.get_files()[num+1]
 
 			log.time()
-			log.write("[--] " + "Running pairSeq.py: %s & %s" % (file1, file2))
+			log.write("[--] " + "Running pairSeq.py: %s & %s" % (file1.getName(), file2.getName()))
 			
 			# Test if the two files in the pair have the same delimiter registered in the config file.
 			if file1.getDelim() == file2.getDelim():
