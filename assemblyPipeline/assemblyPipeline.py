@@ -328,6 +328,9 @@ class PairSeq(object):
 			file1 = conf.get_files()[num]
 			file2 = conf.get_files()[num+1]
 
+			inFile1 = noFileExt(file1.getName())[0] + conf.fxt_ext + conf.ca_ext + conf.fqf_ext + noFileExt(file1.getName())[1]
+			inFile2 = noFileExt(file2.getName())[0] + conf.fxt_ext + conf.ca_ext + conf.fqf_ext + noFileExt(file2.getName())[1]
+
 			log.time()
 			log.write("[--] " + "Running pairSeq.py: %s & %s" % (file1.getName(), file2.getName()))
 			
@@ -339,7 +342,7 @@ class PairSeq(object):
 				break
 			
 			try:
-				subprocess.call(["pairSeq.py", file1.getName(), file2.getName(), file1.getDelim()])
+				subprocess.call(["pairSeq.py", inFile1, inFile2, file1.getDelim()])
 			except:
 				print "Wrong again!"
 
