@@ -45,9 +45,6 @@ class Conf(object):
 		self.p = config.get('fastq_quality_filter', 'p')
 		self.k = config.get('fastq_quality_filter', 'k')
 		self.cpus = config.get('clc', 'cpus')
-		self.output_novo = config.get('clc', 'output_novo')
-		self.output_ref = config.get('clc', 'output_ref')
-		self.output_info = config.get('clc', 'output_info')
 		self.output_prefix = config.get('output', 'prefix')
 		self.min_dist = config.get('clc', 'min_dist')
 		self.max_dist = config.get('clc', 'max_dist')
@@ -176,13 +173,13 @@ class Conf(object):
 		return self.cpus
 
 	def get_output_novo(self):
-		return self.output_novo
+		return self.output_prefix + "_novo.out"
 
 	def get_output_ref(self):
-		return self.output_ref
+		return self.output_prefix + "_ref.out"
 
 	def get_output_info(self):
-		return self.output_info
+		return self.output_prefix + "_info.out"
 	
 	def get_output_prefix(self):
 		return self.output_prefix
@@ -355,8 +352,8 @@ class Clc_novo_assemble(object):
 	def run(self):
 
 		log.write('\n'"	clc"'\n')
-		log.time()
-		log.write("[--] " + "Running clc_novo_assemble")
+#		log.time()
+#		log.write("[--] " + "Running clc_novo_assemble")
 
 		args = ["clc_novo_assemble", "--cpus", str(conf.get_cpus()), 
 			"-o", os.getcwdu() + "/" + str(conf.get_output_novo()), 
@@ -364,14 +361,23 @@ class Clc_novo_assemble(object):
 
 		args.extend(["-q", "-i"])
 		for pair in conf.getPairs():
+			
+			inFile_1 = noFileExt(pair[0])[0][:-5] + conf.fxt_ext + conf.ca_ext + conf.fqf_ext + ".Pair" + noFileExt(pair[0])[1]
+			inFile_2 = noFileExt(pair[1])[0][:-5] + conf.fxt_ext + conf.ca_ext + conf.fqf_ext + ".Pair" + noFileExt(pair[1])[1]	
+
+
 			# TODO: Test if files exists and are non-empty.
-			args.extend([str(pair[0]), str(pair[1])])
+			args.extend([inFile_1, inFile_2])
 
 		args.extend(["-p", "no", "-q"])
 		for i in conf.getSinglets():
+			singlesFile = noFileExt(i)[0][:-8] + conf.fxt_ext + conf.ca_ext + conf.fqf_ext + ".Singles" + noFileExt(i)[1]
 			# TODO: Test if file exists and is non-empty.
-			args.append(str(i))
+			args.append(singlesFile)
 		try:
+			print "[--] Running clc_novo_assemble: %s" % args
+			log.time()
+			log.write("[--] Running clc_novo_assemble: %s" % args)
 			subprocess.call(args)
 		except:
 			print "No, no, no!"
@@ -382,24 +388,31 @@ class Clc_ref_assemble(object):
 	
 	def run(self):
 
-		log.time()
-		log.write("[--] " + "Running clc_ref_assemble")
-
 		args = ["clc_ref_assemble", "--cpus", str(conf.get_cpus()), 
 			"-o", os.getcwdu() + "/" + str(conf.get_output_ref()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
 
 		args.extend(["-q", "-i"])
 		for pair in conf.getPairs():
+			
+			inFile_1 = noFileExt(pair[0])[0][:-5] + conf.fxt_ext + conf.ca_ext + conf.fqf_ext + ".Pair" + noFileExt(pair[0])[1]
+			inFile_2 = noFileExt(pair[1])[0][:-5] + conf.fxt_ext + conf.ca_ext + conf.fqf_ext + ".Pair" + noFileExt(pair[1])[1]
+			
 			# TODO: Test if files exists and are non-empty.
-			args.extend([str(pair[0]), str(pair[1])])
+#			args.extend([str(pair[0]), str(pair[1])])
+			args.extend([inFile_1, inFile_2])
 
 		args.extend(["-p", "no", "-q"])
 		for i in conf.getSinglets():
 			# TODO: Test if file exists and is non-empty.
-			args.append(str(i))
+			singlesFile = noFileExt(i)[0][:-8] + conf.fxt_ext + conf.ca_ext + conf.fqf_ext + ".Singles" + noFileExt(i)[1]
+#			args.append(str(i))
+			args.append(singlesFile)
 		args.extend(["-d", str(conf.get_output_novo())])
 		try:
+			print "[--] Running clc_ref_assemble: %s" % args
+			log.time()
+			log.write("[--] Running clc_ref_assemble: %s" % args)
 			subprocess.call(args)
 		except:
 			print "No, no, no!"
@@ -411,12 +424,13 @@ class Clc_info_assemble(object):
 
 	def run(self):
 
-		log.time()
-		log.write("[--] " + "Running assembly_info")
-
 		args = ["assembly_info", "-c", "-n", conf.get_output_ref()]
 
 		try:
+			print "[--] Running assembly_info: %s" % args
+			log.time()
+			log.write("[--] Running assembly_info: %s" % args)
+
 			call = subprocess.Popen(args, stdout=subprocess.PIPE)
 			data = call.communicate()[0]
 
