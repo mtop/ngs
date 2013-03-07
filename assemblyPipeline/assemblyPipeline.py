@@ -134,7 +134,7 @@ class Conf(object):
 #			return True
 
 	def run_clc_assembler(self):
-		if self.clc_assemble == "":
+		if self.clc_assembler == "":
 			return False
 		if self.clc_assembler.lower()[0] == 'y' or self.clc_assembler.lower()[0] == 't':
 			return True
@@ -488,7 +488,7 @@ def main(conf):
 		ps.run()
 
 	if conf.run_clc_assembler() == True:
-		clcNovo = Clc_assemble(conf)
+		clcNovo = Clc_assembler(conf)
 		clcNovo.run()
 
 	if conf.run_clc_mapper() == True:
