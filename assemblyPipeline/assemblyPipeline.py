@@ -53,12 +53,9 @@ class Conf(object):
 		self.ca = config.get('run', 'cutadapt')
 		self.fqf = config.get('run', 'fastq_quality_filter')
 		self.ps = config.get('run', 'pairSeq.py')
-#		self.clc_novo_assemble = config.get('run', 'clc_novo_assemble')			# Legacy.
-#		self.clc_ref_assemble = config.get('run', 'clc_ref_assemble')
-#		self.clc_info_assemble = config.get('run', 'clc_info_assemble')
-		self.clc_assemble = config.get('run', 'clc_assemble')
-		self.clc_mapper = config.get('run', 'clc_mapper')
-		self.clc_mapping_info = config.get('run', 'clc_mapping_info')
+		self.clc_novo_assemble = config.get('run', 'clc_novo_assemble')
+		self.clc_ref_assemble = config.get('run', 'clc_ref_assemble')
+		self.clc_info_assemble = config.get('run', 'clc_info_assemble')
 
 		self.fxt_ext = ".FXT"
 		self.ca_ext = ".CA"
@@ -359,7 +356,7 @@ class Clc_novo_assemble(object):
 #		log.write("[--] " + "Running clc_novo_assemble")
 
 		args = ["clc_novo_assemble", "--cpus", str(conf.get_cpus()), 
-			"-o", str(os.getcwdu()) + "/" + str(conf.get_output_novo()), 
+			"-o", os.getcwdu() + "/" + str(conf.get_output_novo()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
 
 		args.extend(["-q", "-i"])
