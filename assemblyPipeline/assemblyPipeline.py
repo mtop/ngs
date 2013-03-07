@@ -56,7 +56,7 @@ class Conf(object):
 #		self.clc_novo_assemble = config.get('run', 'clc_novo_assemble')			# Legacy.
 #		self.clc_ref_assemble = config.get('run', 'clc_ref_assemble')
 #		self.clc_info_assemble = config.get('run', 'clc_info_assemble')
-		self.clc_assemble = config.get('run', 'clc_assemble')
+		self.clc_assembler = config.get('run', 'clc_assembler')
 		self.clc_mapper = config.get('run', 'clc_mapper')
 		self.clc_mapping_info = config.get('run', 'clc_mapping_info')
 
@@ -133,10 +133,10 @@ class Conf(object):
 #		if self.clc_novo_assemble.lower()[0] == 'y' or self.clc_novo_assemble.lower()[0] == 't':
 #			return True
 
-	def run_clc_assemble(self):
+	def run_clc_assembler(self):
 		if self.clc_assemble == "":
 			return False
-		if self.clc_assemble.lower()[0] == 'y' or self.clc_assemble.lower()[0] == 't':
+		if self.clc_assembler.lower()[0] == 'y' or self.clc_assembler.lower()[0] == 't':
 			return True
 
 #	def run_clc_ref_assemble(self):
@@ -367,7 +367,7 @@ class PairSeq(object):
 
 			num = num+2
 
-class Clc_assemble(object):
+class Clc_assembler(object):
 	def __init__(self, conf):
 		conf = conf
 
@@ -377,7 +377,7 @@ class Clc_assemble(object):
 #		log.time()
 #		log.write("[--] " + "Running clc_novo_assemble")
 
-		args = ["clc_assemble", "--cpus", str(conf.get_cpus()), 
+		args = ["clc_assembler", "--cpus", str(conf.get_cpus()), 
 			"-o", str(os.getcwdu()) + "/" + str(conf.get_output_novo()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
 
@@ -397,9 +397,9 @@ class Clc_assemble(object):
 			# TODO: Test if file exists and is non-empty.
 			args.append(singlesFile)
 		try:
-			print "[--] Running clc_assemble: %s" % args
+			print "[--] Running clc_assembler: %s" % args
 			log.time()
-			log.write("[--] Running clc_assemble: %s" % args)
+			log.write("[--] Running clc_assembler: %s" % args)
 			subprocess.call(args)
 		except:
 			print "No, no, no!"
@@ -487,7 +487,7 @@ def main(conf):
 		ps = PairSeq(conf)
 		ps.run()
 
-	if conf.run_clc_assemble() == True:
+	if conf.run_clc_assembler() == True:
 		clcNovo = Clc_assemble(conf)
 		clcNovo.run()
 
