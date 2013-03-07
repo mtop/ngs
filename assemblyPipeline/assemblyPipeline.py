@@ -161,6 +161,7 @@ class Conf(object):
 		if self.clc_mapping_info == "":
 			return False
 		if self.clc_mapping_info.lower()[0] == 'y' or self.clc_mapping_info.lower()[0] == 't':
+			return True
 		
 
 	def get_files(self):
