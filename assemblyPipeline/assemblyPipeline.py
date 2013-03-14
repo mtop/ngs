@@ -195,13 +195,13 @@ class Conf(object):
 		return self.cpus
 
 	def get_output_novo(self):
-		return self.output_prefix + "_novo.out"
+		return self.output_prefix + "_novo.fa"
 
 	def get_output_ref(self):
-		return self.output_prefix + "_ref.out"
+		return self.output_prefix + "_ref.cas"
 
 	def get_output_info(self):
-		return self.output_prefix + "_info.out"
+		return self.output_prefix + "_info.txt"
 	
 	def get_output_prefix(self):
 		return self.output_prefix
