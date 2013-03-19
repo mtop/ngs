@@ -53,9 +53,12 @@ class Conf(object):
 		self.ca = config.get('run', 'cutadapt')
 		self.fqf = config.get('run', 'fastq_quality_filter')
 		self.ps = config.get('run', 'pairSeq.py')
-		self.clc_novo_assemble = config.get('run', 'clc_novo_assemble')
-		self.clc_ref_assemble = config.get('run', 'clc_ref_assemble')
-		self.clc_info_assemble = config.get('run', 'clc_info_assemble')
+#		self.clc_novo_assemble = config.get('run', 'clc_novo_assemble')			# Legacy.
+#		self.clc_ref_assemble = config.get('run', 'clc_ref_assemble')
+#		self.clc_info_assemble = config.get('run', 'clc_info_assemble')
+		self.clc_assembler = config.get('run', 'clc_assembler')
+		self.clc_mapper = config.get('run', 'clc_mapper')
+		self.clc_mapping_info = config.get('run', 'clc_mapping_info')
 
 		self.fxt_ext = ".FXT"
 		self.ca_ext = ".CA"
@@ -124,23 +127,42 @@ class Conf(object):
 		if self.ps.lower()[0] == 'y' or self.ps.lower()[0] == 't':
 			return True
 
-	def run_clc_novo_assemble(self):
-		if self.clc_novo_assemble == "":
+#	def run_clc_novo_assemble(self):
+#		if self.clc_novo_assemble == "":
+#			return False
+#		if self.clc_novo_assemble.lower()[0] == 'y' or self.clc_novo_assemble.lower()[0] == 't':
+#			return True
+
+	def run_clc_assembler(self):
+		if self.clc_assembler == "":
 			return False
-		if self.clc_novo_assemble.lower()[0] == 'y' or self.clc_novo_assemble.lower()[0] == 't':
+		if self.clc_assembler.lower()[0] == 'y' or self.clc_assembler.lower()[0] == 't':
 			return True
 
-	def run_clc_ref_assemble(self):
-		if self.clc_ref_assemble == "":
+#	def run_clc_ref_assemble(self):
+#		if self.clc_ref_assemble == "":
+#			return False
+#		if self.clc_ref_assemble.lower()[0] == 'y' or self.clc_ref_assemble.lower()[0] == 't':
+#			return True
+
+	def run_clc_mapper(self):
+		if self.clc_mapper == "":
 			return False
-		if self.clc_ref_assemble.lower()[0] == 'y' or self.clc_ref_assemble.lower()[0] == 't':
+		if self.clc_mapper.lower()[0] == 'y' or self.clc_mapper.lower()[0] == 't':
 			return True
 
-	def run_clc_info_assemble(self):
-		if self.clc_info_assemble == "":
+#	def run_clc_info_assemble(self):
+#		if self.clc_info_assemble == "":
+#			return False
+#		if self.clc_info_assemble.lower()[0] == 'y' or self.clc_info_assemble.lower()[0] == 't':
+#			return True
+
+	def run_clc_mapping_info(self):
+		if self.clc_mapping_info == "":
 			return False
-		if self.clc_info_assemble.lower()[0] == 'y' or self.clc_info_assemble.lower()[0] == 't':
+		if self.clc_mapping_info.lower()[0] == 'y' or self.clc_mapping_info.lower()[0] == 't':
 			return True
+		
 
 	def get_files(self):
 		return self.files
@@ -173,13 +195,13 @@ class Conf(object):
 		return self.cpus
 
 	def get_output_novo(self):
-		return self.output_prefix + "_novo.out"
+		return self.output_prefix + "_novo.fa"
 
 	def get_output_ref(self):
-		return self.output_prefix + "_ref.out"
+		return self.output_prefix + "_ref.cas"
 
 	def get_output_info(self):
-		return self.output_prefix + "_info.out"
+		return self.output_prefix + "_info.txt"
 	
 	def get_output_prefix(self):
 		return self.output_prefix
@@ -345,7 +367,7 @@ class PairSeq(object):
 
 			num = num+2
 
-class Clc_novo_assemble(object):
+class Clc_assembler(object):
 	def __init__(self, conf):
 		conf = conf
 
@@ -355,8 +377,8 @@ class Clc_novo_assemble(object):
 #		log.time()
 #		log.write("[--] " + "Running clc_novo_assemble")
 
-		args = ["clc_novo_assemble", "--cpus", str(conf.get_cpus()), 
-			"-o", os.getcwdu() + "/" + str(conf.get_output_novo()), 
+		args = ["clc_assembler", "--cpus", str(conf.get_cpus()), 
+			"-o", str(os.getcwdu()) + "/" + str(conf.get_output_novo()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
 
 		args.extend(["-q", "-i"])
@@ -375,20 +397,20 @@ class Clc_novo_assemble(object):
 			# TODO: Test if file exists and is non-empty.
 			args.append(singlesFile)
 		try:
-			print "[--] Running clc_novo_assemble: %s" % args
+			print "[--] Running clc_assembler: %s" % args
 			log.time()
-			log.write("[--] Running clc_novo_assemble: %s" % args)
+			log.write("[--] Running clc_assembler: %s" % args)
 			subprocess.call(args)
 		except:
 			print "No, no, no!"
 
-class Clc_ref_assemble(object):
+class Clc_mapper(object):
 	def __init__(self, conf):
 		conf = conf
 	
 	def run(self):
 
-		args = ["clc_ref_assemble", "--cpus", str(conf.get_cpus()), 
+		args = ["clc_mapper", "--cpus", str(conf.get_cpus()), 
 			"-o", os.getcwdu() + "/" + str(conf.get_output_ref()), 
 			"-p", "fb", "ss", str(conf.get_min_dist()), str(conf.get_max_dist())]
 
@@ -410,26 +432,26 @@ class Clc_ref_assemble(object):
 			args.append(singlesFile)
 		args.extend(["-d", str(conf.get_output_novo())])
 		try:
-			print "[--] Running clc_ref_assemble: %s" % args
+			print "[--] Running clc_mapper: %s" % args
 			log.time()
-			log.write("[--] Running clc_ref_assemble: %s" % args)
+			log.write("[--] Running clc_mapper: %s" % args)
 			subprocess.call(args)
 		except:
 			print "No, no, no!"
 
 
-class Clc_info_assemble(object):
+class Clc_mapping_info(object):
 	def __init__(self, conf):
 		conf = conf
 
 	def run(self):
 
-		args = ["assembly_info", "-c", "-n", conf.get_output_ref()]
+		args = ["clc_mapping_info", "-c", "-n", conf.get_output_ref()]
 
 		try:
-			print "[--] Running assembly_info: %s" % args
+			print "[--] Running clc_mapping_info: %s" % args
 			log.time()
-			log.write("[--] Running assembly_info: %s" % args)
+			log.write("[--] Running clc_mapping_info: %s" % args)
 
 			call = subprocess.Popen(args, stdout=subprocess.PIPE)
 			data = call.communicate()[0]
@@ -439,7 +461,7 @@ class Clc_info_assemble(object):
 			out.close()
 
 		except:
-			print "Assembly_info is fubar"
+			print "clc_mapping_info is fubar"
 		
 
 def noFileExt(fileName):
@@ -465,16 +487,16 @@ def main(conf):
 		ps = PairSeq(conf)
 		ps.run()
 
-	if conf.run_clc_novo_assemble() == True:
-		clcNovo = Clc_novo_assemble(conf)
+	if conf.run_clc_assembler() == True:
+		clcNovo = Clc_assembler(conf)
 		clcNovo.run()
 
-	if conf.run_clc_ref_assemble() == True:
-		clcRef = Clc_ref_assemble(conf)
+	if conf.run_clc_mapper() == True:
+		clcRef = Clc_mapper(conf)
 		clcRef.run()
 
-	if conf.run_clc_info_assemble() == True:
-		clcInfo = Clc_info_assemble(conf)
+	if conf.run_clc_mapping_info() == True:
+		clcInfo = Clc_mapping_info(conf)
 		clcInfo.run()
 
 	log.write("[--] Analysis finished %s" % time.ctime())	
