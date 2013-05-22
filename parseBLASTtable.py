@@ -18,10 +18,13 @@ for line in table_file.readlines():
 			bact_result[line.split()[0].replace(",", "" )] = line.split()[1]
 			
 for key in pt_result:
+	print key
 	lineNr = 1
 #	key.split(".")
 	gff_file = key.split(".")[0] + ".gff"
+	print gff_file
 	for line in open(gff_file, "r").readlines():
+		print lineNr, key.split(".")[1]
 		if lineNr == key.split(".")[1]:
 			print line.split()[3], line.split()[4]
 		lineNr =+1
