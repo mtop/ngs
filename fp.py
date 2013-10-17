@@ -12,6 +12,7 @@ parser.add_argument("--unique", help="Print the unique sequence in one or severa
 parser.add_argument("--remove", help="Remove duplicates in one or several fasta files.", action="store_true")
 parser.add_argument("--header", help="Print sequence headers (use together with --length).", action="store_true")
 parser.add_argument("files", nargs="*", type=str, help="The names of the input files.")
+parser.add_argument("--seq", help="Print the sequence for the provided header")
 args = parser.parse_args()
 ###########################################################################################
 
@@ -32,7 +33,7 @@ class fastaSeq(object):
 		return len(self.seq)
 
 	def __str__(self):
-		return "%s%s" % (self.header, self.sequence)
+		return "%s%s" % (self.name, self.seq)
 
 
 
@@ -114,6 +115,14 @@ def duplicates_or_unique():
 			print sequence_dict[sequence][0].rstrip()
 			print sequence
 
+def print_sequence():
+	for infile in args.files:
+		with open(infile) as my_file:
+			for name, seq in read_fasta(my_file):
+				fs = fastaSeq(name, seq)
+				if args.seq in fs.header():
+					print fs
+
 
 if __name__ == "__main__":
 
@@ -131,3 +140,6 @@ if __name__ == "__main__":
 
 	if args.remove == True:
 		duplicates_or_unique()
+	
+	if args.seq:
+		print_sequence()
