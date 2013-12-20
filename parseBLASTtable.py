@@ -1,64 +1,70 @@
 #!/usr/bin/env python
 
 import sys
+import argparse
 
-table = sys.argv[1]
-table_file = open(table, "r")
-pt_result = {}
+parser = argparse.ArgumentParser()
+parser.add_argument("-e", "--evalue", help="Set the cutoff e-value", default="1.0")
+parser.add_argument("-i", "--infile", help="Set input file", nargs="*")
+parser.add_argument("-g", "--group", help="Set the organism group to parse the result for [BAC, DIA, CHY, OOM]", nargs="*", default="BAC" )
+args = parser.parse_args()
+
+table_file = open(args.infile[0], "r")
 bact_result = {}
-result = {}
-
-# Extract best hit for each gene prediction, and store them in two dictionaries.
-for line in table_file.readlines():
-	if line[:8] == "# Query:":
-		length = line.split()[3]
-	if line[:6] == "contig":
-		hit = [line.split()[1]]
-		identity = line.split()[2]
-		if "|ref|" in line.split()[1]:
-#			pt_result[line.split()[0].replace(",", "" )] = hit #line.split()[1]
-#			pt_result[line.split()[0].replace(",", "" )].append("Pt")
-			result[line.split()[0].replace(",", "" )] = hit
-			result[line.split()[0].replace(",", "" )].append("Pt")
-			result[line.split()[0].replace(",", "" )].append(identity)
-			result[line.split()[0].replace(",", "" )].append(length)
-		else:
-#			bact_result[line.split()[0].replace(",", "" )] = hit #line.split()[1]
-#			bact_result[line.split()[0].replace(",", "" )].append("B")
-			result[line.split()[0].replace(",", "" )] = hit
-			result[line.split()[0].replace(",", "" )].append("B")
-			result[line.split()[0].replace(",", "" )].append(identity)
-			result[line.split()[0].replace(",", "" )].append(length)
+diatom_result = {}
+chytrid_result = {}
+oomyc_result = {}
 
 
-# Find the start and stop positions of the gene prediction in the Pt contigs.
-for key in result:
-	gff_file = key.split(".")[0] + ".gff"
-	for line in open(gff_file, "r").readlines():
-		# Identify the right line in the *.gff file.
-		if key.split(".")[1] == line.split()[9][5:].replace("\"", ""):
-			start = line.split()[3]
-			stop = line.split()[4]
-#			result[key].append("Pt")
-			result[key].append(start)
-			result[key].append(stop)
+def main():
+	# Extract best hit for each gene prediction, and store them in different dictionaries.
+	for line in table_file.readlines():
+		if line.split()[1][:4] == "BAC_" or line.split()[1][:4] == "CYA_":
+			# Make first selection based on e-value for the BLAST match.
+			if float(line.split()[10]) < float(args.evalue):
+				try:
+					bact_result[line.split()[0]] += 1
+				except KeyError:
+					bact_result[line.split()[0]] = 1
 
+		if line.split()[1][:4] == "DIA_":
+			# Make first selection based on e-value for the BLAST match.
+			if float(line.split()[10]) < float(args.evalue):
+				try:
+					diatom_result[line.split()[0]] += 1
+				except KeyError:
+					bact_result[line.split()[0]] = 1
 
-#for key in bact_result:
-#	gff_file = key.split(".")[0] + ".gff"
-#	for line in open(gff_file, "r").readlines():
-#		# Identify the right line in the *.gff file.
-#		if key.split(".")[1] == line.split()[9][5:].replace("\"", ""):
-#			start = line.split()[3]
-#			stop = line.split()[4]
-#			bact_result[key].append("B")
-#			bact_result[key].append(start)
-#			bact_result[key].append(stop)
+		if line.split()[1][:4] == "CHY_":
+			# Make first selection based on e-value for the BLAST match.
+			if float(line.split()[10]) < float(args.evalue):
+				try:
+					chytrid_result[line.split()[0]] += 1
+				except KeyError:
+					bact_result[line.split()[0]] = 1
 
-
-print "# Contig_nr" + "\t" + "Pt/B" + "\t" + "% Id." + "\t" + "Length" +  "\t" + "Start" + "\t" + "Stop" + "\t" + "Model" + "\t" + "Match"
-for key in sorted(result):
-	print key.split(".")[0] + "\t" + result[key][1] + "\t" + result[key][2] + "\t" + result[key][3] + "\t" + result[key][4] + "\t" + result[key][5] + "\t" + key.split(".")[1] + "\t" + result[key][0]
-
-
+		if line.split()[1][:4] == "OOM_":
+			# Make first selection based on e-value for the BLAST match.
+			if float(line.split()[10]) < float(args.evalue):
+				try:
+					oomyc_result[line.split()[0]] += 1
+				except KeyError:
+					oomyc_result[line.split()[0]] = 1
 	
+	# Print result to STDOUT
+	if args.group == "BAC":
+		for key in bact_result:
+			print key
+	if args.group == "DIA":
+		for key in diatom_result:
+			print key
+	if args.group == "CHY":
+		for key in chytrid_result:
+			print key
+	if args.group == "OOM":
+		for key in oomyc_result:
+			print key
+
+
+if __name__ == "__main__":
+	main()
