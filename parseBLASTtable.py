@@ -9,8 +9,8 @@ parser.add_argument("-a", "--a_length", help="Include matches with an alignment 
 parser.add_argument("-q", "--q_length", help="Include matches where the query sequence length is > [q-length]", default="0")
 parser.add_argument("-p", "--percent", help="Minimum percentage of hits to as sequence from [group]", default="1")
 parser.add_argument("-i", "--infile", help="Set input file", nargs="*")
-parser.add_argument("-g", "--group", help="Set the organism group to parse the result for [BAC, DIA, CHY, OOM]", nargs="*", default="BAC" )
-parser.add_argument("-t", "--grxxxoup", help="Set the organism group to parse the result for [BAC, DIA, CHY, OOM]", action="store_true")
+parser.add_argument("-g", "--group", help="Set the organism group to parse the result for [BAC, DIA, CHY, OOM]", nargs="*") #, default="NO_GROUP")
+parser.add_argument("-t", "--test", help="Test if some subject sequences have any of the correct prefixes [BAC, DIA, CHY, OOM]", action="store_true")
 args = parser.parse_args()
 
 try:
@@ -29,9 +29,17 @@ class Result(object):
 		self.diatom_result = {}
 		self.chytrid_result = {}
 		self.oomyc_result = {}
+		self.best_match = {}
 
-	def setDIA(self):
-		pass
+	def setBestMatch(self, line):
+		try:
+			# Test if a match with a better e-value has already been saved.
+#			print self.best_match[line.split()[0]].split()[10]
+			if float(self.best_match[line.split()[0]].split()[10]) > float(line.split()[10]):
+				self.best_match[line.split()[0]] = line
+		except KeyError:
+			# Store line if no match has been saved before.
+			self.best_match[line.split()[0]] = line
 
 	def passedSelection(self, contig):
 		try:
@@ -78,6 +86,8 @@ def main():
 	for line in table_file.readlines():
 		if line.split()[1][:4] == "BAC_" or line.split()[1][:4] == "CYA_":
 			if selection(line, result):
+				# Test, then store best match (e-value).
+				result.setBestMatch(line)
 				try:
 					result.bact_result[line.split()[0]] += 1
 				except KeyError:
@@ -85,6 +95,8 @@ def main():
 
 		if line.split()[1][:4] == "DIA_":
 			if selection(line, result):
+				# Test, then store best match (e-value).
+				result.setBestMatch(line)
 				try:
 					result.diatom_result[line.split()[0]] += 1
 				except KeyError:
@@ -92,6 +104,8 @@ def main():
 
 		if line.split()[1][:4] == "CHY_":
 			if selection(line, result):
+				# Test, then store best match (e-value).
+				result.setBestMatch(line)
 #			if float(line.split()[10]) < float(args.evalue):
 				try:
 					result.chytrid_result[line.split()[0]] += 1
@@ -101,6 +115,8 @@ def main():
 
 		if line.split()[1][:4] == "OOM_":
 			if selection(line, result):
+				# Test, then store best match (e-value).
+				result.setBestMatch(line)
 #			if float(line.split()[10]) < float(args.evalue):
 				try:
 					result.oomyc_result[line.split()[0]] += 1
@@ -110,23 +126,28 @@ def main():
 
 	
 	# Print result to STDOUT
-	for group in args.group:
-		if group == "BAC":
-			for key in result.bact_result:
-				if fraction(result.bact_result, key, result):
-					print key
-		if group == "DIA":
-			for key in result.diatom_result:
-				if fraction(result.diatom_result, key, result):
-					print key
-		if group == "CHY":
-			for key in result.chytrid_result:
-				if fraction(result.chytrid_result, key, result):
-					print key
-		if group == "OOM":
-			for key in result.oomyc_result:
-				if fraction(result.oomyc_result, key, result):
-					print key
+	if not args.group:
+		for key in result.best_match:
+			# Pring query sequence name, e-value and name of best match.
+			print result.best_match[key].split()[0] + "\t" + result.best_match[key].split()[10] + "\t" + result.best_match[key].split()[1]
+	else:
+		for group in args.group:
+			if group == "BAC":
+				for key in result.bact_result:
+					if fraction(result.bact_result, key, result):
+						print key
+			if group == "DIA":
+				for key in result.diatom_result:
+					if fraction(result.diatom_result, key, result):
+						print key
+			if group == "CHY":
+				for key in result.chytrid_result:
+					if fraction(result.chytrid_result, key, result):
+						print key
+			if group == "OOM":
+				for key in result.oomyc_result:
+					if fraction(result.oomyc_result, key, result):
+						print key
 
 def tests():
 	# Test if some subject sequences have the correct prefix.
@@ -138,7 +159,7 @@ def tests():
 			or line.split()[1][:4] == "CHY_" \
 			or line.split()[1][:4] == "OOM_":
 				length = line.split()[12]
-				break
+				sys.exit("[ -- ] Input file seems to be in the right format")
 		except:
 			raise
 			sys.exit("[ Error ] Input file is not in the right format")
@@ -147,5 +168,6 @@ def tests():
 	
 
 if __name__ == "__main__":
-#	tests()
+	if args.test == True:
+		tests()
 	main()
