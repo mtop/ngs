@@ -9,8 +9,9 @@ parser.add_argument("-a", "--a_length", help="Include matches with an alignment 
 parser.add_argument("-q", "--q_length", help="Include matches where the query sequence length is > [q-length]", default="0")
 parser.add_argument("-p", "--percent", help="Minimum percentage of hits to as sequence from [group]", default="1")
 parser.add_argument("-i", "--infile", help="Set input file", nargs="*")
-parser.add_argument("-g", "--group", help="Set the organism group to parse the result for [BAC, DIA, CHY, OOM]", nargs="*") #, default="NO_GROUP")
+parser.add_argument("-g", "--group", help="Set the organism group to parse the result for [BAC, DIA, CHY, OOM, CONT]", nargs="*") #, default="NO_GROUP")
 parser.add_argument("-t", "--test", help="Test if some subject sequences have any of the correct prefixes [BAC, DIA, CHY, OOM]", action="store_true")
+#parser.add_argument("-v", "--verbose", help="Provide more verbose output", action="store_true")
 args = parser.parse_args()
 
 try:
@@ -128,8 +129,11 @@ def main():
 	# Print result to STDOUT
 	if not args.group:
 		for key in result.best_match:
-			# Pring query sequence name, e-value and name of best match.
-			print result.best_match[key].split()[0] + "\t" + result.best_match[key].split()[10] + "\t" + result.best_match[key].split()[1]
+			# Pring query sequence name, e-value, length of query sequence and name of best match.
+			print result.best_match[key].split()[0] + "\t" \
+				+ result.best_match[key].split()[10] + "\t"	\
+				+ result.best_match[key].split()[12] + "\t"	\
+				+ result.best_match[key].split()[1]
 	else:
 		for group in args.group:
 			if group == "BAC":
@@ -147,6 +151,16 @@ def main():
 			if group == "OOM":
 				for key in result.oomyc_result:
 					if fraction(result.oomyc_result, key, result):
+						print key
+
+			if group == "CONT":
+				from collections import Counter
+				dicts = [result.bact_result, result.chytrid_result, result.oomyc_result]
+				c = Counter()
+				for d in dicts:
+					c.update(d)
+				for key in dict(c):
+					if fraction(dict(c), key, result):
 						print key
 
 def tests():
