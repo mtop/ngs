@@ -5,7 +5,6 @@
 # clc_mapping_info that is part of the CLC assembly cell package.
 #
 # ./parseCLCinfo.py -h
-#
 
 import argparse
 import re
