@@ -11,6 +11,7 @@ parser.add_argument("--duplicates", help="Find sequences in common between two o
 parser.add_argument("--unique", help="Print the unique sequence in one or several fasta files.", action="store_true")
 parser.add_argument("--remove", help="Remove duplicated sequences in one or several fasta files.", action="store_true")
 parser.add_argument("--header", help="Print sequence headers (use together with --length).", action="store_true")
+parser.add_argument("--filter_length", help="Print sequence longer than [threshold] to screen.", default=0)
 parser.add_argument("files", nargs="*", type=str, help="The names of the input files.")
 parser.add_argument("--seq", help="Print the sequence for the provided header")
 args = parser.parse_args()
@@ -124,6 +125,20 @@ def print_sequence():
 				if args.seq in fs.header():
 					print fs.header()
 
+def filter_length():
+	# Extract sequences longer then a certain threshold
+	print args.filter_length
+	for infile in args.files:
+		with open(infile) as my_file:
+			for name, seq in read_fasta(my_file):
+				fs = fastaSeq(name, seq)
+				print fs.length()
+				if int(fs.length()) >= int(args.filter_length):
+#					print fs.header()
+#					print fs.sequence()
+					print fs
+				
+
 
 if __name__ == "__main__":
 
@@ -144,3 +159,6 @@ if __name__ == "__main__":
 	
 	if args.seq:
 		print_sequence()
+
+	if args.filter_length:
+		filter_length()
