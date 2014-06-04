@@ -120,10 +120,9 @@ def print_sequence():
 		with open(infile) as my_file:
 			for name, seq in read_fasta(my_file):
 				fs = fastaSeq(name, seq)
-<<<<<<< HEAD
-<<<<<<< HEAD
 				if args.seq == fs.header():
 					print fs
+					print fs.header()
 
 #def print_sequences():
 #	for infile in args.files:
@@ -138,12 +137,7 @@ def print_sequence():
 #									print header
 #				except:
 #					pass
-=======
-=======
->>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
 #				if args.seq == fs.header().replace(">", ""):
-				if args.seq in fs.header():
-					print fs.header()
 
 def filter_length():
 	# Extract sequences longer then a certain threshold
@@ -158,40 +152,12 @@ def filter_length():
 #					print fs.sequence()
 					print fs
 
-#def print_sequences():
-#   for infile in args.files:
-#       with open(infile) as my_file:
-#           for name, seq in read_fasta(my_file):
-#               try:
-#                   for grep_file in args.grep:
-#                       with open(grep_file) as infile:
-#                           for header in infile.readlines():
-#                               print name[1:].rstrip(), header
-#                               if name == header:
-#                                   print header
-#               except:
-#                   pass
-<<<<<<< HEAD
->>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
-=======
->>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
-
 def grep():
 	for grep_file in args.grep:
 		with open(grep_file) as infile:
 			for header in infile.readlines():
 				print header
 				print_sequence(header)
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-				
-
->>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
-=======
-				
-
->>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
 
 
 if __name__ == "__main__":
