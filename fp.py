@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 class fastaSeq(object):
 	def __init__(self, name, seq):
-		self.name = name[1:].rstrip()
+		self.name = name
 		self.seq = seq
 
 	def header(self):
@@ -35,7 +35,7 @@ class fastaSeq(object):
 		return len(self.seq)
 
 	def __str__(self):
-		return ">%s\n%s" % (self.name, self.seq)
+		return "%s%s" % (self.name, self.seq)
 
 
 
@@ -112,6 +112,8 @@ def duplicates_or_unique():
 		### Remove duplicates ###
 		# Note: Will only remove identical sequences, not identical fasta headers
 		if args.remove == True:
+#			combi_header = ""
+#			with header in sequence_dict[sequence]:				
 			print sequence_dict[sequence][0].rstrip()
 			print sequence
 
@@ -120,24 +122,9 @@ def print_sequence():
 		with open(infile) as my_file:
 			for name, seq in read_fasta(my_file):
 				fs = fastaSeq(name, seq)
-				if args.seq == fs.header():
-					print fs
-					print fs.header()
-
-#def print_sequences():
-#	for infile in args.files:
-#		with open(infile) as my_file:
-#			for name, seq in read_fasta(my_file):
-#				try:
-#					for grep_file in args.grep:
-#						with open(grep_file) as infile:
-#							for header in infile.readlines():
-#								print name[1:].rstrip(), header
-#								if name == header:
-#									print header
-#				except:
-#					pass
 #				if args.seq == fs.header().replace(">", ""):
+				if args.seq in fs.header():
+					print fs.header()
 
 def filter_length():
 	# Extract sequences longer then a certain threshold
@@ -152,16 +139,31 @@ def filter_length():
 #					print fs.sequence()
 					print fs
 
+#def print_sequences():
+#   for infile in args.files:
+#       with open(infile) as my_file:
+#           for name, seq in read_fasta(my_file):
+#               try:
+#                   for grep_file in args.grep:
+#                       with open(grep_file) as infile:
+#                           for header in infile.readlines():
+#                               print name[1:].rstrip(), header
+#                               if name == header:
+#                                   print header
+#               except:
+#                   pass
+
 def grep():
 	for grep_file in args.grep:
 		with open(grep_file) as infile:
 			for header in infile.readlines():
 				print header
 				print_sequence(header)
+				
 
 
 if __name__ == "__main__":
-	
+
 	if args.length == True:
 		length()
 
