@@ -121,6 +121,7 @@ def print_sequence():
 			for name, seq in read_fasta(my_file):
 				fs = fastaSeq(name, seq)
 <<<<<<< HEAD
+<<<<<<< HEAD
 				if args.seq == fs.header():
 					print fs
 
@@ -138,6 +139,8 @@ def print_sequence():
 #				except:
 #					pass
 =======
+=======
+>>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
 #				if args.seq == fs.header().replace(">", ""):
 				if args.seq in fs.header():
 					print fs.header()
@@ -168,6 +171,9 @@ def filter_length():
 #                                   print header
 #               except:
 #                   pass
+<<<<<<< HEAD
+>>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
+=======
 >>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
 
 def grep():
@@ -177,6 +183,11 @@ def grep():
 				print header
 				print_sequence(header)
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+				
+
+>>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
 =======
 				
 

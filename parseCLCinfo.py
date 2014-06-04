@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+#
 # parseCLCinfo.py extracts information about individual 
 # contigs from the output file created by the program 
 # clc_mapping_info that is part of the CLC assembly cell package.
