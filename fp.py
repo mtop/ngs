@@ -9,8 +9,9 @@ parser.add_argument("--length", help="Print length of sequences to STDOUT.", act
 parser.add_argument("--longest", help="Print the longest sequence to STDOUT, and its length to STDERR.", action="store_true")
 parser.add_argument("--duplicates", help="Find sequences in common between two or more fasta files, or duplicates in a single file.", action="store_true")
 parser.add_argument("--unique", help="Print the unique sequence in one or several fasta files.", action="store_true")
-parser.add_argument("--remove", help="Remove duplicates in one or several fasta files.", action="store_true")
+parser.add_argument("--remove", help="Remove duplicated sequences in one or several fasta files.", action="store_true")
 parser.add_argument("--header", help="Print sequence headers (use together with --length).", action="store_true")
+parser.add_argument("--filter_length", help="Print sequence longer than [threshold] to screen.", default=0)
 parser.add_argument("files", nargs="*", type=str, help="The names of the input files.")
 parser.add_argument("--seq", help="Print the sequence for the provided header")
 parser.add_argument("--grep", help="Use headers in file as arguments for --seq", nargs=1)
@@ -25,7 +26,7 @@ class fastaSeq(object):
 		self.seq = seq
 
 	def header(self):
-		return self.name
+		return self.name[1:]
 
 	def sequence(self):
 		return self.seq
@@ -105,7 +106,7 @@ def duplicates_or_unique():
 		if args.unique == True:
 			if len(sequence_dict[sequence]) == 1:
 				for header in sequence_dict[sequence]:
-					print header.rstrip()
+					print ">", header.rstrip()
 					print sequence
 
 		### Remove duplicates ###
@@ -119,6 +120,7 @@ def print_sequence():
 		with open(infile) as my_file:
 			for name, seq in read_fasta(my_file):
 				fs = fastaSeq(name, seq)
+<<<<<<< HEAD
 				if args.seq == fs.header():
 					print fs
 
@@ -135,6 +137,38 @@ def print_sequence():
 #									print header
 #				except:
 #					pass
+=======
+#				if args.seq == fs.header().replace(">", ""):
+				if args.seq in fs.header():
+					print fs.header()
+
+def filter_length():
+	# Extract sequences longer then a certain threshold
+	print args.filter_length
+	for infile in args.files:
+		with open(infile) as my_file:
+			for name, seq in read_fasta(my_file):
+				fs = fastaSeq(name, seq)
+				print fs.length()
+				if int(fs.length()) >= int(args.filter_length):
+#					print fs.header()
+#					print fs.sequence()
+					print fs
+
+#def print_sequences():
+#   for infile in args.files:
+#       with open(infile) as my_file:
+#           for name, seq in read_fasta(my_file):
+#               try:
+#                   for grep_file in args.grep:
+#                       with open(grep_file) as infile:
+#                           for header in infile.readlines():
+#                               print name[1:].rstrip(), header
+#                               if name == header:
+#                                   print header
+#               except:
+#                   pass
+>>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
 
 def grep():
 	for grep_file in args.grep:
@@ -142,6 +176,11 @@ def grep():
 			for header in infile.readlines():
 				print header
 				print_sequence(header)
+<<<<<<< HEAD
+=======
+				
+
+>>>>>>> 8f52dc873ca8d94425417b9dc6ae1a94b2f69da6
 
 
 if __name__ == "__main__":
@@ -163,3 +202,6 @@ if __name__ == "__main__":
 	
 	if args.seq:
 		print_sequence()
+
+	if args.filter_length:
+		filter_length()
