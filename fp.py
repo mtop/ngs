@@ -14,6 +14,7 @@ parser.add_argument("--header", help="Print sequence headers (use together with 
 parser.add_argument("--filter_length", help="Print sequence longer than [threshold] to screen.", default=0)
 parser.add_argument("files", nargs="*", type=str, help="The names of the input files.")
 parser.add_argument("--seq", help="Print the sequence for the provided header")
+parser.add_argument("--grep", help="Use headers in file as arguments for --seq", nargs=1)
 args = parser.parse_args()
 ###########################################################################################
 
@@ -137,6 +138,27 @@ def filter_length():
 #					print fs.header()
 #					print fs.sequence()
 					print fs
+
+#def print_sequences():
+#   for infile in args.files:
+#       with open(infile) as my_file:
+#           for name, seq in read_fasta(my_file):
+#               try:
+#                   for grep_file in args.grep:
+#                       with open(grep_file) as infile:
+#                           for header in infile.readlines():
+#                               print name[1:].rstrip(), header
+#                               if name == header:
+#                                   print header
+#               except:
+#                   pass
+
+def grep():
+	for grep_file in args.grep:
+		with open(grep_file) as infile:
+			for header in infile.readlines():
+				print header
+				print_sequence(header)
 				
 
 
