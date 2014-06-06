@@ -124,7 +124,7 @@ def print_sequence():
 				fs = fastaSeq(name, seq)
 #				if args.seq == fs.header().replace(">", ""):
 				if args.seq in fs.header():
-					print fs.header()
+					print fs
 
 def filter_length():
 	# Extract sequences longer then a certain threshold
