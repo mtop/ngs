@@ -120,7 +120,8 @@ def print_sequence():
 		with open(infile) as my_file:
 			for name, seq in read_fasta(my_file):
 				fs = fastaSeq(name, seq)
-				if args.seq in fs.header():
+#				if args.seq in fs.header():			# Fubar
+				if args.seq + '\n' == fs.header():
 					print fs
 
 
