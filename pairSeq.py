@@ -49,9 +49,9 @@ from itertools import izip
 
 f1 = sys.argv[1]
 f2 = sys.argv[2]
-delim = sys.argv[3].strip('"\'')	# Perhaps redundant to try to remove " and ' characters.
-
-if delim == None:
+try:
+	delim = sys.argv[3].strip('"\'')	# Perhaps redundant to try to remove " and ' characters.
+except:
 	delim = ' '
 
 
