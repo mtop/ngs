@@ -146,12 +146,10 @@ def print_sequence():
 
 def filter_length():
 	# Extract sequences longer then a certain threshold
-	print args.filter_length
 	for infile in args.files:
 		with open(infile) as my_file:
 			for name, seq in read_fasta(my_file):
 				fs = fastaSeq(name, seq)
-				print fs.length()
 				if int(fs.length()) >= int(args.filter_length):
 					print fs
 
@@ -162,6 +160,7 @@ def grep():
 			for header in infile.readlines():
 				print header
 				print_sequence(header)
+
 
 
 if __name__ == "__main__":
