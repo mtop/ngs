@@ -38,6 +38,8 @@ def sample():
 		sys.exit("[Error] The requested random sample is greater than the total number of sequences.")
 	for seq in randomList:
 		print seq[1].format("fastq").rstrip("\n")
+	my_file.close()
+	exit("Process exited successfully")
 	
 				
 if __name__ == "__main__":
