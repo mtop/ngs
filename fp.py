@@ -158,8 +158,14 @@ def grep():
 	for grep_file in args.grep:
 		with open(grep_file) as infile:
 			for header in infile.readlines():
-				print header
-				print_sequence(header)
+				# Redundant code, from print_sequence()
+				for infile in args.files:
+					with open(infile) as my_file:
+						for name, seq in read_fasta(my_file):
+							fs = fastaSeq(name, seq)
+							if header == fs.header():
+								print fs
+								
 
 
 
@@ -185,3 +191,6 @@ if __name__ == "__main__":
 
 	if args.filter_length:
 		filter_length()
+
+	if args.grep:
+		grep()
