@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-e", "--evalue", help="Include matches with an evalue < [evalue]", default="100.0")
 parser.add_argument("-a", "--a_length", help="Include matches with an alignment length > [a-length] ", default="0")
 parser.add_argument("-q", "--q_length", help="Include matches where the query sequence length is > [q-length]", default="0")
+parser.add_argument("-s", "--s_length", help="Include matches where the subject sequence length is > [s-length]", default="0")
 parser.add_argument("-%", "--identity", help="Include matches where the BLAST match has an identity > [identity]", default="0.0")
 parser.add_argument("-p", "--percent", help="Minimum percentage of hits to as sequence from [group]", default="1")
 parser.add_argument("-i", "--infile", help="Set input file", nargs="*")
@@ -82,7 +83,8 @@ def selection(line, result):
 	if float(line.split()[10]) <= float(args.evalue)\
 		and int(line.split()[3]) >= int(args.a_length)\
 		and float(line.split()[2]) >= float(args.identity)\
-		and int(line.split()[12]) >= int(args.q_length):
+		and int(line.split()[12]) >= int(args.q_length)\
+		and int(line.split()[13]) >= int(args.s_length):
 #		print float(line.split()[2]), float(args.identity)
 		return True
 	else:
