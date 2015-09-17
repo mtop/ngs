@@ -163,7 +163,7 @@ def grep():
 					with open(infile) as my_file:
 						for name, seq in read_fasta(my_file):
 							fs = fastaSeq(name, seq)
-							if header == fs.header():
+							if header.rstrip() in fs.header():
 								print fs
 								
 
