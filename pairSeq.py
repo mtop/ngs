@@ -152,7 +152,7 @@ class fastqFile(file):
 	def getSeqs(self):
 		with self as f:
 			for line in f:
-				if line[0:4] == "@HWI":
+				if line[0:6] == "@HISEQ":
 					# Create a sequence object.
 					seq = sequence()
 					seq.setId(line)
