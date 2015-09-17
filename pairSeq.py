@@ -43,10 +43,6 @@ import gc
 #import io
 from itertools import izip
 
-
-
-
-
 f1 = sys.argv[1]
 f2 = sys.argv[2]
 try:
