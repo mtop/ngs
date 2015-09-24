@@ -157,15 +157,27 @@ def filter_length():
 def grep():
 	for grep_file in args.grep:
 		with open(grep_file) as infile:
-			for header in infile.readlines():
+			for header in infile.readlines():			# Grep-file
 				# Redundant code, from print_sequence()
-				for infile in args.files:
+				for infile in args.files:			# Fasta file
 					with open(infile) as my_file:
 						for name, seq in read_fasta(my_file):
 							fs = fastaSeq(name, seq)
 							if header == fs.header():
 								print fs
-								
+
+#def grep():
+#	print args.grep
+#	print args.files
+#	grep_file = open(args.grep[0], "r")
+#	fasta_file = open(args.files, "r")
+#	for fasta_file in args.files:
+#		fasta = open(fasta_file, "r")
+#		for name, seq in read_fasta(fasta):
+#			for header in grep_file.readlines():
+#				fs = fastaSeq(name, seq)
+#				if header == fs.header():
+#					print fs
 
 
 
