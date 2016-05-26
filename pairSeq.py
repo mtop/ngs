@@ -182,7 +182,7 @@ def compSeqOrder(outPair_1, outPair_2):
 			return count
 
 def noFileExt(fileName):
-	if fileName[-6:].lower() == ".fastq" or fileName[-3:].lower() == ".fq":
+	if fileName[-6:].lower() == ".fastq":
 		name = fileName[:-6]
 		ext = fileName[-6:]
 		return name, ext
