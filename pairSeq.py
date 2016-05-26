@@ -43,8 +43,18 @@ import gc
 #import io
 from itertools import izip
 
+# Identify the input files
 f1 = sys.argv[1]
 f2 = sys.argv[2]
+
+# Identify the sequence ID's
+def getSeqId():
+	with open(f1, 'r') as f:
+		first_line = f.readline()
+		return first_line[0:3]
+seqID = getSeqId()
+
+
 try:
 	delim = sys.argv[3].strip('"\'')	# Perhaps redundant to try to remove " and ' characters.
 except:
@@ -104,7 +114,7 @@ class fastqFile(file):
 			if not data:
 				break
 			yield data
-
+	
 	def Ids2Dict(self):
 		# Reads the file, one sequence object at the time, and identifies
 		# the sequence identifiers. The identifiers
@@ -148,7 +158,8 @@ class fastqFile(file):
 	def getSeqs(self):
 		with self as f:
 			for line in f:
-				if line[0:3] == getSeqId():
+#				if line[0:3] == getSeqId():
+				if line[0:3] == seqID:
 					# Create a sequence object.
 					seq = sequence()
 					seq.setId(line)
@@ -171,7 +182,7 @@ def compSeqOrder(outPair_1, outPair_2):
 			return count
 
 def noFileExt(fileName):
-	if fileName[-6:].lower() == ".fastq":
+	if fileName[-6:].lower() == ".fastq" or fileName[-3:].lower() == ".fq":
 		name = fileName[:-6]
 		ext = fileName[-6:]
 		return name, ext
@@ -182,10 +193,10 @@ def genFileName(inFile, outType):
 	newName = name + outType + ext
 	return newName
 
-def getSeqId():
-	with open(f1, 'r') as f:
-		first_line = f.readline()
-		return first_line[0:3]
+#def getSeqId():
+#	with open(f1, 'r') as f:
+#		first_line = f.readline()
+#		return first_line[0:3]
 
 					
 def main():
