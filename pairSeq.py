@@ -148,7 +148,7 @@ class fastqFile(file):
 	def getSeqs(self):
 		with self as f:
 			for line in f:
-				if line[0:6] == "@HISEQ":
+				if line[0:3] == getSeqId():
 					# Create a sequence object.
 					seq = sequence()
 					seq.setId(line)
@@ -182,6 +182,11 @@ def genFileName(inFile, outType):
 	newName = name + outType + ext
 	return newName
 
+def getSeqId():
+	with open(f1, 'r') as f:
+		first_line = f.readline()
+		return first_line[0:3]
+
 					
 def main():
 	# Generate fastqFile objects to read from and write to.
@@ -192,7 +197,7 @@ def main():
 	outSing_1 = fastqFile(genFileName(f1, ".Singles"), 'w')
 	outSing_2 = fastqFile(genFileName(f2, ".Singles"), 'w')
 
-	# Create dictionari containing sequence id's from first file (info. on direction removed).
+	# Create dictionary containing sequence id's from first file (info. on direction removed).
 	print "[--] Building initial dictionary of sequence id's in first file."
 	fwDict = inFile1.Ids2Dict()			
 
