@@ -31,13 +31,13 @@ parser.add_argument("--unique", help="Print the unique sequence in one or severa
 parser.add_argument("--remove", help="Remove duplicated sequences in one or several fasta files.", action="store_true")
 parser.add_argument("--header", help="Print sequence headers (use together with --length).", action="store_true")
 parser.add_argument("--filter_length", help="Print sequence longer than [threshold] to screen.", default=0)
-parser.add_argument("files", type=str, help="The name of the input file.")
+parser.add_argument("files", nargs="*", type=str, help="The name of the input file.")
 parser.add_argument("--seq", help="Print the sequence for the provided header")
 parser.add_argument("--grep", help="Use headers in file as arguments for --seq", nargs=1)
 args = parser.parse_args()
 ###########################################################################################
 
-seq_dict = {}
+#seq_dict = {}
 
 ###########################################################################################
 
@@ -158,16 +158,17 @@ def filter_length():
 					print fs
 
 def grep():
+	seq_dict = {}
 	with open(args.grep[0]) as grep_file: 
-		with open(args.files) as fasta_file:
-			for name, seq in read_fasta(fasta_file):
-				seq_dict[name.lstrip(">")] = seq
-			for header in grep_file.readlines():	
-				try:
-					print ">" + header.rstrip("\n")
-					print seq_dict[header]
-				except KeyError as e:
-					pass
+		for infile in args.files:				
+			with open(infile) as fasta_file:
+				for name, seq in read_fasta(fasta_file):
+					seq_dict[name.lstrip(">")] = seq
+		for header in grep_file.readlines():	
+			try:
+				print ">" + header + seq_dict[header]
+			except KeyError as e:
+				pass
 
 #def grep():
 #	print args.grep
