@@ -26,11 +26,12 @@ parser.add_argument("--example", help="Print example commands.")
 args = parser.parse_args()
 
 # Make sure the "--representation" option is accompanied by a "--sample_delimiter" option.
-if args.representation and args.sample_delimiter is None:
+if args.representation != 1 and args.sample_delimiter is None:
     parser.error("You need to specify [--sample_delimiter] in order to use the [--representation] option.")
 
 #######################################################
 # parseCDHITresult.py my_CD-HIT_results_file.clstr	Prints center sequence headers of all clusters.
+# parseCDHITresult.py my_CD-HIT_results_file.clstr -r 1 -d "_TRINITY_"	Same as previous example.
 # parseCDHITresult.py my_CD-HIT_results_file.clstr -r 2 -d "_TRINITY_"	Prints center sequence headers of cluster with representatives from atleast two samples, where the sample names are preceded by the string "_TRINITY_" in the sequence header.
 #######################################################
 
