@@ -18,6 +18,11 @@ except ImportError:
 parser = argparse.ArgumentParser(prog="parseCDHITresult.py")
 parser.add_argument("-v", "--verbose", action="store_true", help="Be more verbose")
 parser.add_argument("cdhitfile", type=str, help="The name of the CH-HIT results file [*.clust] to analyse.")
+parser.add_argument("-c", "--cluster_size", default="1", type=int, help="Return center sequences from clusters of size equal or greater to this value.")
+parser.add_argument("-d", "--sample_delimiter", type=str, help="Indicate the delimiter between sample name and sequence name in the sequence header.")
+parser.add_argument("-r", "--representation", default="1", type=int, help="Return center sequences from clusters with representatives from a specified number of samples.")
+
+
 args = parser.parse_args()
 
 
@@ -47,6 +52,16 @@ class Cluster(object):
 
 	def get_identities(self):
 		return self.r_identity_list
+
+	def get_cluster_size(self):
+		return len(self.r_number_list)
+	
+	def get_center(self):
+		i = 0
+		for number in self.get_identities():
+			if number == "REF":
+				return self.r_seq_name_list[i]
+			i += 1
 
 	def parse_result(self):
 		self.r_number_list = []
@@ -82,7 +97,6 @@ def readCDHITtable(infile):
 			if cluster: yield (cluster, ''.join(result))
 			cluster, result = line, []
 		else:
-#			line = line.rstrip()
 			result.append(line)
 	if cluster: yield (cluster, ''.join(result))
 
@@ -94,9 +108,9 @@ def main():
 			clusters.append(Cluster(cluster, stuff))
 	
 	for cluster in clusters:
-#		print cluster.get_result()
-		print cluster
-		break
+		print int(cluster.get_cluster_size())
+		if int(cluster.get_cluster_size()) >= int(args.cluster_size):
+			print cluster.get_center()
 
 
 if __name__ == "__main__":
