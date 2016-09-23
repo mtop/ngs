@@ -108,7 +108,6 @@ def main():
 			clusters.append(Cluster(cluster, stuff))
 	
 	for cluster in clusters:
-		print int(cluster.get_cluster_size())
 		if int(cluster.get_cluster_size()) >= int(args.cluster_size):
 			print cluster.get_center()
 
