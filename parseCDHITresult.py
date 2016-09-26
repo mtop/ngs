@@ -129,9 +129,6 @@ def readCDHITtable(infile):
 			result.append(line)
 	if cluster: yield (cluster, ''.join(result))
 
-#def monsterIFstatement():
-#	if int(cluster.get_cluster_size()) >= int(args.cluster_size):
-#		print 
 
 def main():
 	# Parse the CD-HIT input file and extract all information needed for further analyses.
@@ -140,7 +137,8 @@ def main():
 		for cluster, stuff in readCDHITtable(infile):
 			clusters.append(Cluster(cluster, stuff))
 	
-	# Print the center sequence of all cluster that fullfills the criteria set using the commandline options. This will be amoster style "if" statment...
+	# Print the center sequence of all cluster that fullfills the criteria 
+	# set using the commandline options. This will be a moster style "if" statment...
 	for cluster in clusters:
 		if int(cluster.get_cluster_size()) >= int(args.cluster_size) and cluster.get_number_of_samples() >= args.representation :
 			print cluster.get_center()
