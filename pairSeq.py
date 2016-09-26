@@ -118,7 +118,7 @@ class fastqFile(file):
 	def Ids2Dict(self):
 		# Reads the file, one sequence object at the time, and identifies
 		# the sequence identifiers. The identifiers
-		# are den split at the indicated delimiter, and the first
+		# are then split at the indicated delimiter, and the first
 		# part is stored in a dictionary.
 		seqIdDict = {}
 
