@@ -1,4 +1,5 @@
-#!/usr/local/opt/python/bin/python2.7
+#!/usr/local/packages/anaconda2/bin/python
+	#!/usr/local/opt/python/bin/python2.7
 
 ###################################################
 #
