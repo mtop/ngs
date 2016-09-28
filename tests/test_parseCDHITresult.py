@@ -40,4 +40,11 @@ class TestCluster:
 
 	def test_cluster_size(self):
 		n = 0
+		size = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+		for cluster in self.populate_the_class():
+			assert cluster.get_cluster_size() == size[n]
+			n += 1
+	
+
+
 
