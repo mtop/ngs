@@ -2,43 +2,46 @@
 
 import sys
 
-# Make sure the argparser module is installed (not by default in version <= 2.6). 
-try:
-    import argparse
-except ImportError:
-	sys.stderr.write("[Error] The python module 'argparse' is not installed\n")
-	sys.stderr.write("[--] Would you like to install it now using 'sudo easy_install' [Y/N]? ")
-	answer = sys.stdin.readline()
-	if answer[0].lower() == "y":
-		sys.stderr.write("[--] Running 'sudo easy_install argparse'\n")
-		from subprocess import call
-		call(["sudo", "easy_install", "argparse"])
-	else:
-		sys.exit("[Error] Exiting due to missing dependency 'argparser'")
+def parse_args(args):
+
+	# Make sure the argparser module is installed (not by default in version <= 2.6). 
+	try:
+	    import argparse
+	except ImportError:
+		sys.stderr.write("[Error] The python module 'argparse' is not installed\n")
+		sys.stderr.write("[--] Would you like to install it now using 'sudo easy_install' [Y/N]? ")
+		answer = sys.stdin.readline()
+		if answer[0].lower() == "y":
+			sys.stderr.write("[--] Running 'sudo easy_install argparse'\n")
+			from subprocess import call
+			call(["sudo", "easy_install", "argparse"])
+		else:
+			sys.exit("[Error] Exiting due to missing dependency 'argparser'")
 														        
-parser = argparse.ArgumentParser(prog="parseCDHITresult.py")
-parser.add_argument("-v", "--verbose", action="store_true", help="Be more verbose")
-parser.add_argument("cdhitfile", type=str, help="The name of the CH-HIT results file [*.clust] to analyse.")
-parser.add_argument("-c", "--cluster_size", default="1", type=int, help="Return center sequences from clusters of size equal or greater to this value.")
-parser.add_argument("-d", "--sample_delimiter", type=str, help="Indicate the delimiter between sample name and sequence name in the sequence header.")
-parser.add_argument("-r", "--representation", default="1", type=int, help="Return center sequences from clusters with representatives from a specified number [or greater] of samples.")
-parser.add_argument("--example", help="Print example commands.")
-args = parser.parse_args()
-
-# Make sure the "--representation" option is accompanied by a "--sample_delimiter" option.
-if args.representation != 1 and args.sample_delimiter is None:
-    parser.error("You need to specify [--sample_delimiter] in order to use the [--representation] option.")
-
-#######################################################
-# parseCDHITresult.py my_CD-HIT_results_file.clstr	Prints center sequence headers of all clusters.
-# parseCDHITresult.py my_CD-HIT_results_file.clstr -r 1 -d "_TRINITY_"	Same as previous example.
-# parseCDHITresult.py my_CD-HIT_results_file.clstr -r 2 -d "_TRINITY_"	Prints center sequence headers of cluster with representatives from atleast two samples, where the sample names are preceded by the string "_TRINITY_" in the sequence header.
-#######################################################
-
+	parser = argparse.ArgumentParser(prog="parseCDHITresult.py")
+	parser.add_argument("-v", "--verbose", action="store_true", help="Be more verbose")
+	parser.add_argument("cdhitfile", type=str, help="The name of the CH-HIT results file [*.clust] to analyse.")
+	parser.add_argument("-c", "--cluster_size", default="1", type=int, help="Return center sequences from clusters of size equal or greater to this value.")
+	parser.add_argument("-d", "--sample_delimiter", type=str, help="Indicate the delimiter between sample name and sequence name in the sequence header.")
+	parser.add_argument("-r", "--representation", default="1", type=int, help="Return center sequences from clusters with representatives from a specified number [or greater] of samples.")
+	parser.add_argument("--example", help="Print example commands.")
+#	args = parser.parse_args()
+	return parser.parse_args(args)
+	
+#	# Make sure the "--representation" option is accompanied by a "--sample_delimiter" option.
+#	if args.representation != 1 and args.sample_delimiter is None:
+#	    parser.error("You need to specify [--sample_delimiter] in order to use the [--representation] option.")
+	
+	#######################################################
+	# parseCDHITresult.py my_CD-HIT_results_file.clstr	Prints center sequence headers of all clusters.
+	# parseCDHITresult.py my_CD-HIT_results_file.clstr -r 1 -d "_TRINITY_"	Same as previous example.
+	# parseCDHITresult.py my_CD-HIT_results_file.clstr -r 2 -d "_TRINITY_"	Prints center sequence headers of cluster with representatives from atleast two samples, where the sample names are preceded by the string "_TRINITY_" in the sequence header.
+	#######################################################
+	
 
 
 class Cluster(object):
-	def __init__(self, cluster, result):
+	def __init__(self, cluster, result, args):
 		self.name = cluster
 		self.result = result
 		self.parse_result()
@@ -135,7 +138,7 @@ def main():
 	clusters = []
 	with open(args.cdhitfile) as infile:
 		for cluster, stuff in readCDHITtable(infile):
-			clusters.append(Cluster(cluster, stuff))
+			clusters.append(Cluster(cluster, stuff, args))
 	
 	# Print the center sequence of all cluster that fullfills the criteria 
 	# set using the commandline options. This will be a moster style "if" statment...
@@ -145,4 +148,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+	args = parse_args(sys.argv[1:])
+	# Make sure the "--representation" option is accompanied by a "--sample_delimiter" option.
+	if args.representation != 1 and args.sample_delimiter is None:
+		parser.error("You need to specify [--sample_delimiter] in order to use the [--representation] option.")
+	main()
