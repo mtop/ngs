@@ -94,3 +94,20 @@ class TestCluster:
 			assert cluster.get_number_of_samples() == number_of_samples[n]
 			n += 1
 
+######################################################################################
+
+	def test_two_sample_cluster(self):
+		myProcess = subprocess.Popen("parseCDHITresult.py -d _TRINITY_ -r 2 tests/small_cluster-file.clstr", shell=True, stdout=subprocess.PIPE)
+		result = open("tests/two_sample_cluster_output.txt", "r")
+		assert myProcess.stdout.readlines() == result.readlines()
+
+
+	def test_three_sample_cluster(self):
+		myProcess = subprocess.Popen("parseCDHITresult.py -d _TRINITY_ -r 3 tests/small_cluster-file.clstr", shell=True, stdout=subprocess.PIPE)
+		result = open("tests/three_sample_cluster_output.txt", "r")
+		assert myProcess.stdout.readlines() == result.readlines()
+
+	def test_five_sample_cluster(self):
+		myProcess = subprocess.Popen("parseCDHITresult.py -d _TRINITY_ -r 5 tests/small_cluster-file.clstr", shell=True, stdout=subprocess.PIPE)
+		result = open("tests/five_sample_cluster_output.txt", "r")
+		assert myProcess.stdout.readlines() == result.readlines()
