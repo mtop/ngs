@@ -31,6 +31,8 @@ class TestCluster:
 			n += 1
 
 #	def test_result(self):
+#		# Everything that is contained in the output 
+#		# from this method is outputed by the other methods
 #		pass
 
 	def test_results_numbers(self):
@@ -57,10 +59,19 @@ class TestCluster:
 			n += 1
 
 	def test_strains(self):
-		pass
+		n = 0
+		strains = [["REF"], ["+", "REF"], ["+", "REF", "+"], ["REF", "+", "+", "+"], ["+", "+", "+", "REF", "+"], ['+', '+', '+', 'REF', '+', '+'], ['+', '+', '+', '+', 'REF', '+', '+'], ['+', '+', '+', '+', '+', '+', '+', 'REF'], ['+', '+', '+', '+', '+', '+', '+', '+', 'REF'], ['+', '+', '+', '+', '+', '+', '+', 'REF', '+', '+']]
+		for cluster in self.populate_the_class():
+			assert cluster.get_strains() == strains[n]
+			n += 1
 
 	def test_identities(self):
-		pass
+		n = 0
+		identities = [['REF'], [99.99, 'REF'], [100.0, 'REF', 100.0], ['REF', 99.93, 98.91, 100.0], [99.82, 99.89, 98.9, 'REF', 99.53], [100.0, 100.0, 100.0, 'REF', 100.0, 100.0], [100.0, 100.0, 99.94, 100.0, 'REF', 99.71, 99.71], [100.0, 99.95, 100.0, 100.0, 100.0, 100.0, 100.0, 'REF'], [99.84, 99.93, 100.0, 100.0, 100.0, 99.65, 99.5, 99.78, 'REF'], [99.94, 99.15, 99.95, 99.98, 98.32, 99.97, 99.95, 'REF', 99.98, 99.94]]
+		for cluster in self.populate_the_class():
+			print cluster.get_identities()
+			assert cluster.get_identities() == identities[n]
+			n += 1
 
 	def test_cluster_size(self):
 		n = 0
