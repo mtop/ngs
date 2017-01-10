@@ -34,6 +34,7 @@ parser.add_argument("--filter_length", help="Print sequence longer than [thresho
 parser.add_argument("files", nargs="*", type=str, help="The name of the input file.")
 parser.add_argument("--seq", help="Print the sequence for the provided header")
 parser.add_argument("--grep", help="Use headers in file as arguments for --seq", nargs=1)
+parser.add_argument("--gc", help="Calculate the GC ratio for sequences", action="store_true")
 args = parser.parse_args()
 ###########################################################################################
 
@@ -54,6 +55,15 @@ class fastaSeq(object):
 
 	def length(self):
 		return len(self.seq)
+	
+	def get_gc(self):
+		self.a = self.seq.lower().count("a")
+		self.t = self.seq.lower().count("t")
+		self.c = self.seq.lower().count("c")
+		self.g = self.seq.lower().count("g")
+		self.gc_count = self.g + self.c
+		self.gc_ration = (float(self.gc_count) / self.length()) * 100
+		return ("%.1f" % self.gc_ration) + "%"
 
 	def __str__(self):
 		return "%s%s" % (self.name, self.seq)
@@ -170,6 +180,14 @@ def grep():
 			except KeyError as e:
 				pass
 
+def gc():
+	for infile in args.files:
+		with open(infile) as my_file:
+			print "GC			Sequence"
+			for name, seq in read_fasta(my_file):
+				fs = fastaSeq(name, seq)
+				print fs.get_gc() + "\t" + fs.header().rstrip()
+
 #def grep():
 #	print args.grep
 #	print args.files
@@ -210,3 +228,6 @@ if __name__ == "__main__":
 
 	if args.grep:
 		grep()
+
+	if args.gc == True:
+		gc()
