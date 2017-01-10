@@ -100,7 +100,7 @@ def main():
 	for infile in args.files:
 		with open(infile) as my_file:
 			for name, seq in read_fasta(my_file):
-				print name.rstrip("\n")
+#				print name.rstrip("\n")
 				my_seq = fastaSeq(name, seq)
 				for gc_ratio in my_seq.get_gc():
 					print gc_ratio
