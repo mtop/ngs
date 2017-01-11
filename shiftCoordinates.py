@@ -22,21 +22,33 @@ parser.add_argument("-v", "--verbose", action="store_true", help="Be more verbos
 parser.add_argument("-s", "--shift",  help="Number of bases to shift the features of the genebank file", default=0, type=int)
 args = parser.parse_args()
 
+def shift(line, feature):
+	# Isolate the actuall coordinates
+	coordinates = line.rsplit()[1].replace("complement(", "").replace(")", "")
+	start = int(coordinates.split("..")[0]) + args.shift
+	stop = int(coordinates.split("..")[1]) + args.shift
+	if "complement" in line:
+		print("     %s            complement(%s..%s)" % (feature, start, stop))
+	else:
+		print("     %s            %s..%s" % (feature, start, stop))
+
+
 def main():
 	### Remove the next line and add your own code instead ###
 	gbf = open(args.gbf)
 	for line in gbf.readlines():
 		if "gene" in line and ".." in line:
-#			try:
-			# Isolate the actuall coordinates
-			coordinates = line.rsplit()[1].replace("complement(", "").replace(")", "")
-			start = int(coordinates.split("..")[0]) + args.shift
-			stop = int(coordinates.split("..")[1]) + args.shift
-			if "complement" in line:
-				print("     gene            complement(%s..%s)" % (start, stop))
-			else:
-				print("     gene            %s..%s" % (start, stop))
-#			print "%s%s%s" % (start, "..", stop)
+			shift(line, "gene")
+		elif "CDS" in line and ".." in line:
+			shift(line, "CDS")
+#			# Isolate the actuall coordinates
+#			coordinates = line.rsplit()[1].replace("complement(", "").replace(")", "")
+#			start = int(coordinates.split("..")[0]) + args.shift
+#			stop = int(coordinates.split("..")[1]) + args.shift
+#			if "complement" in line:
+#				print("     gene            complement(%s..%s)" % (start, stop))
+#			else:
+#				print("     gene            %s..%s" % (start, stop))
 		else:
 			print(line, end="")
 
