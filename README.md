@@ -17,7 +17,3 @@ Output: 	'outpair1.fastq' and 'outpair2.fastq' contains the
 		from the first imput file, and 'outpair2.fastq' from 
 		the other. 'outSingles1.fastq' and 'outSingles2.fastq' 
 		contains the singglet sequences from each input file.
-
-
-* Hej Paula!
-
