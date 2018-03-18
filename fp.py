@@ -35,6 +35,7 @@ parser.add_argument("files", nargs="*", type=str, help="The name of the input fi
 parser.add_argument("--seq", help="Print the sequence for the provided header")
 parser.add_argument("--grep", help="Use headers in file as arguments for --seq", nargs=1)
 parser.add_argument("--gc", help="Calculate the GC ratio for sequences", action="store_true")
+parser.add_argument("--gaps", help="Count number of gap characters", action="store_true")
 args = parser.parse_args()
 ###########################################################################################
 
@@ -64,9 +65,16 @@ class fastaSeq(object):
 		self.gc_count = self.g + self.c
 		self.gc_ration = (float(self.gc_count) / self.length()) * 100
 		return ("%.1f" % self.gc_ration) + "%"
+	
+	def get_gaps(self):
+		self.n = self.seq.lower().count("n")
+		self.dash = self.seq.lower().count("-")
+#		self.ratio = (self.n + self.dash) / self.length()
+		return self.n, self.dash, self.length()
+		
 
 	def __str__(self):
-		return "%s%s" % (self.name, self.seq)
+		return "%s\n%s" % (self.name, self.seq)
 
 
 ### From BioPython and http://stackoverflow.com/questions/7654971/parsing-a-fasta-file-using-a-generator-python ###
@@ -75,12 +83,12 @@ def read_fasta(infile):
 	name, seq = None, []
 	for line in infile:
 		if line.startswith(">"):
-			if name: yield (name, ''.join(seq))
-			name, seq = line, []
+			if name: yield (name.split()[0], ''.join(seq))
+			name, seq = line.split()[0], []
 		else:
 			line = line.rstrip()
 			seq.append(line)
-	if name: yield (name, ''.join(seq))
+	if name: yield (name.split()[0], ''.join(seq))
 
 
 ### Print the length of sequences ###
@@ -154,7 +162,8 @@ def print_sequence():
 			for name, seq in read_fasta(my_file):
 				fs = fastaSeq(name, seq)
 #				if args.seq in fs.header():			# Fubar
-				if args.seq + '\n' == fs.header():
+#				if args.seq + '\n' == fs.header():
+				if args.seq == fs.header():
 					print fs
 
 
@@ -176,7 +185,7 @@ def grep():
 					seq_dict[name.lstrip(">")] = seq
 		for header in grep_file.readlines():	
 			try:
-				print ">" + header + seq_dict[header]
+				print ">" + header + seq_dict[header.split()[0]]
 			except KeyError as e:
 				pass
 
@@ -187,6 +196,23 @@ def gc():
 			for name, seq in read_fasta(my_file):
 				fs = fastaSeq(name, seq)
 				print fs.get_gc() + "\t" + fs.header().rstrip()
+
+def gaps():
+	n = 0
+	dash = 0
+	length = 0
+	for infile in args.files:
+		with open(infile) as my_file:
+			for name, seq in read_fasta(my_file):
+				fs = fastaSeq(name, seq)
+				result = fs.get_gaps()
+				n += result[0]
+				dash += result[1]
+				length += result[2]
+				ratio = (n + dash) / length
+#				print n, dash, ratio, length
+	print "N: %s \n-: %s \nRatio: %s \nTotal length: %s" % (n, dash, ratio, length)
+			
 
 #def grep():
 #	print args.grep
@@ -231,3 +257,6 @@ if __name__ == "__main__":
 
 	if args.gc == True:
 		gc()
+
+	if args.gaps == True:
+		gaps()
