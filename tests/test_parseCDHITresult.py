@@ -111,3 +111,8 @@ class TestCluster:
 		myProcess = subprocess.Popen("parseCDHITresult.py -d _TRINITY_ -r 5 tests/small_cluster-file.clstr", shell=True, stdout=subprocess.PIPE)
 		result = open("tests/five_sample_cluster_output.txt", "r")
 		assert myProcess.stdout.readlines() == result.readlines()
+
+	def test_no_single_sequence_cluster(self):
+		myProcess = subprocess.Popen("parseCDHITresult.py -c 2 tests/small_cluster-file.clstr", shell=True, stdout=subprocess.PIPE)
+		result = open("tests/no_single_sequence_cluster.txt", "r")
+		assert myProcess.stdout.readlines() == result.readlines()
