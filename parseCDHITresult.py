@@ -93,6 +93,8 @@ class Cluster(object):
 			i += 1
 
 	def get_number_of_samples(self):
+		# Report the number of samples (e.g. "P3503_104") 
+		# that are represented in the cluster.
 		return len(self.sample_list)
 
 	def parse_result(self):
