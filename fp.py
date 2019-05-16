@@ -152,7 +152,7 @@ def duplicates_or_unique():
 		### Remove duplicates ###
 		# Note: Will only remove identical sequences, not identical fasta headers
 		if args.remove == True:
-			print sequence_dict[sequence][0].rstrip()
+			print ">" + sequence_dict[sequence][0].rstrip()
 			print sequence
 
 
